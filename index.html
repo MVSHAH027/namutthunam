@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Namutthunam (નમુત્થુણં) Sutra Learning App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f7f4;
+            color: #333;
+        }
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .btn-primary {
+            background-color: #2c7a7b;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #286a6b;
+            transform: scale(1.05);
+        }
+        .btn-secondary {
+            background-color: #edf2f7;
+            color: #4a5568;
+        }
+        .btn-secondary:hover {
+            background-color: #e2e8f0;
+        }
+        .lang-btn.active {
+            background-color: #2c7a7b;
+            color: white;
+            font-weight: 700;
+        }
+        .progress-bar-bg {
+            background-color: #e2e8f0;
+            border-radius: 9999px;
+        }
+        .progress-bar-fg {
+            background-color: #48bb78;
+            border-radius: 9999px;
+            transition: width 0.5s ease-in-out;
+        }
+        .flashcard-container {
+            perspective: 1000px;
+        }
+        .flashcard {
+            width: 100%;
+            height: 150px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            cursor: pointer;
+        }
+        .flashcard.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .flashcard-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .flashcard-front {
+            background-color: #ffffff;
+            border: 2px solid #2c7a7b;
+        }
+        .flashcard-back {
+            background-color: #e6fffa;
+            transform: rotateY(180deg);
+            border: 2px solid #2c7a7b;
+        }
+        .quiz-option {
+            border: 2px solid #e2e8f0;
+            transition: all 0.2s;
+        }
+        .quiz-option:hover {
+            border-color: #2c7a7b;
+            background-color: #e6fffa;
+        }
+        .quiz-option.correct {
+            background-color: #c6f6d5;
+            border-color: #38a169;
+        }
+        .quiz-option.incorrect {
+            background-color: #fed7d7;
+            border-color: #e53e3e;
+        }
+        .feedback-box {
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 16px;
+            font-weight: 500;
+        }
+        .feedback-correct {
+            background-color: #c6f6d5;
+            color: #2f855a;
+        }
+        .feedback-incorrect {
+            background-color: #fed7d7;
+            color: #c53030;
+        }
+        .sorter-item.selected {
+            background-color: #38b2ac;
+            color: white;
+            border-color: #2c7a7b;
+        }
+        .sorter-category {
+            border: 2px dashed #cbd5e0;
+            min-height: 100px;
+        }
+        .pdf-content h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2c7a7b;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            border-bottom: 2px solid #b2f5ea;
+            padding-bottom: 0.5rem;
+        }
+        .pdf-content h4 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .pdf-content p {
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+        }
+        .pdf-content .explanation-block {
+            background-color: #f7fafc;
+            border-left: 4px solid #4fd1c5;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+        }
+        .pdf-content .summary-block {
+            background-color: #e6fffa;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin-top: 2rem;
+        }
+        [x-cloak] { display: none; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+</head>
+<body x-data="sutraApp()" x-init="init()" class="bg-gray-50">
+
+    <div class="main-container p-4 md:p-8">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-teal-800" x-text="content.title"></h1>
+            <p class="text-lg text-gray-600 mt-2" x-text="content.subtitle"></p>
+            <div class="mt-6 flex justify-center space-x-2">
+                <button @click="changeLanguage('gu')" class="btn lang-btn" :class="{ 'active': language === 'gu' }">ગુજરાતી</button>
+                <button @click="changeLanguage('hi')" class="btn lang-btn" :class="{ 'active': language === 'hi' }">हिन्दी</button>
+                <button @click="changeLanguage('en')" class="btn lang-btn" :class="{ 'active': language === 'en' }">English</button>
+            </div>
+            
+            <!-- Overall Progress Bar -->
+            <div class="mt-8 max-w-lg mx-auto">
+                <div class="flex justify-between mb-1">
+                    <span class="text-base font-medium text-teal-700" x-text="content.progressContent.overall"></span>
+                    <span class="text-sm font-medium text-teal-700" x-text="`${calculateOverallProgress()}%`"></span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-4">
+                    <div class="bg-teal-500 h-4 rounded-full transition-all duration-500" :style="`width: ${calculateOverallProgress()}%`"></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="card p-2 mb-8 flex justify-center flex-wrap gap-2">
+            <button @click="activeTab = 'sutra'" class="btn" :class="activeTab === 'sutra' ? 'btn-primary' : 'btn-secondary'" x-text="content.nav.sutra"></button>
+            <button @click="activeTab = 'song'" class="btn" :class="activeTab === 'song' ? 'btn-primary' : 'btn-secondary'" x-text="content.nav.song"></button>
+            <button @click="activeTab = 'originalText'" class="btn" :class="activeTab === 'originalText' ? 'btn-primary' : 'btn-secondary'" x-text="content.nav.originalText"></button>
+            <button @click="activeTab = 'wordByWord'" class="btn" :class="activeTab === 'wordByWord' ? 'btn-primary' : 'btn-secondary'" x-text="content.nav.wordByWord"></button>
+            <button @click="activeTab = 'fullMeaning'" class="btn" :class="activeTab === 'fullMeaning' ? 'btn-primary' : 'btn-secondary'" x-text="content.nav.fullMeaning"></button>
+            <button @click="activeTab = 'activities'" class="btn" :class="activeTab === 'activities' ? 'btn-primary' : 'btn-secondary'" x-text="content.nav.activities"></button>
+            <button @click="activeTab = 'progress'" class="btn" :class="activeTab === 'progress' ? 'btn-primary' : 'btn-secondary'" x-text="content.nav.progress"></button>
+        </nav>
+
+        <!-- Main Content -->
+        <main>
+            <!-- Sutra Text -->
+            <div x-show="activeTab === 'sutra'" x-cloak class="card p-6 md:p-8">
+                <h2 class="text-2xl font-bold mb-4 text-teal-700" x-text="content.sutraContent.title"></h2>
+                <div class="space-y-4 text-lg text-gray-700">
+                    <template x-for="(line, index) in content.sutraContent.lines" :key="index">
+                        <p x-text="line"></p>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Song Tab -->
+            <div x-show="activeTab === 'song'" x-cloak class="card p-6 md:p-8">
+                <h2 class="text-2xl font-bold mb-4 text-teal-700" x-text="content.songContent.title"></h2>
+                <!-- YouTube Embed -->
+                <div style="position: relative; padding-bottom: 56.25%; height: 0;" class="mb-6 rounded-lg overflow-hidden shadow-lg">
+                    <iframe style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" src="https://www.youtube.com/embed/ZGQ3iBrCis8" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
+                <!-- Lyrics -->
+                <div>
+                    <h3 class="text-xl font-bold mb-4 text-teal-600" x-text="content.songContent.lyricsTitle"></h3>
+                    <div class="space-y-4 text-gray-700 text-center bg-gray-50 p-4 rounded-lg" x-html="content.songContent.lyrics">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Original PDF Content -->
+            <div x-show="activeTab === 'originalText'" x-cloak class="card p-6 md:p-8 pdf-content">
+                <div x-html="content.originalTextHTML"></div>
+            </div>
+
+            <!-- Word by Word Meaning -->
+            <div x-show="activeTab === 'wordByWord'" x-cloak class="card p-6 md:p-8">
+                 <h2 class="text-2xl font-bold mb-4 text-teal-700" x-text="content.wordByWordContent.title"></h2>
+                 <div class="space-y-4">
+                    <template x-for="(item, index) in content.wordMeanings" :key="index">
+                        <div>
+                            <p class="font-semibold text-teal-600 text-lg" x-text="item.word"></p>
+                            <p class="text-gray-600" x-text="item.meaning"></p>
+                        </div>
+                    </template>
+                 </div>
+            </div>
+
+            <!-- Full Meaning -->
+            <div x-show="activeTab === 'fullMeaning'" x-cloak class="card p-6 md:p-8">
+                <h2 class="text-2xl font-bold mb-4 text-teal-700" x-text="content.fullMeaningContent.title"></h2>
+                <div class="space-y-4 text-gray-700 leading-relaxed">
+                     <template x-for="(paragraph, index) in content.fullMeaningContent.paragraphs" :key="index">
+                        <p x-text="paragraph"></p>
+                    </template>
+                </div>
+                 <h3 class="text-xl font-bold mt-6 mb-2 text-teal-700" x-text="content.fullMeaningContent.summaryTitle"></h3>
+                 <p class="text-gray-700 leading-relaxed" x-text="content.fullMeaningContent.summary"></p>
+            </div>
+
+            <!-- Activities -->
+            <div x-show="activeTab === 'activities'" x-cloak>
+                <h2 class="text-3xl font-bold text-center mb-6 text-teal-700" x-text="content.activitiesContent.title"></h2>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <!-- Level 1 -->
+                    <div class="card p-6 flex flex-col">
+                        <h3 class="text-xl font-bold mb-4 text-teal-600" x-text="content.activitiesContent.level1.title"></h3>
+                        <p class="text-gray-600 mb-4 flex-grow" x-text="content.activitiesContent.level1.description"></p>
+                        <button @click="startActivity('flashcards')" class="btn btn-primary w-full mb-2" x-text="content.activitiesContent.level1.flashcards"></button>
+                        <button @click="startActivity('simpleQuiz')" class="btn btn-primary w-full" x-text="content.activitiesContent.level1.quiz"></button>
+                    </div>
+                    <!-- Level 2 -->
+                    <div class="card p-6 flex flex-col">
+                        <h3 class="text-xl font-bold mb-4 text-teal-600" x-text="content.activitiesContent.level2.title"></h3>
+                        <p class="text-gray-600 mb-4 flex-grow" x-text="content.activitiesContent.level2.description"></p>
+                        <button @click="startActivity('matchColumn')" class="btn btn-primary w-full mb-2" x-text="content.activitiesContent.level2.match"></button>
+                        <button @click="startActivity('fillBlanks')" class="btn btn-primary w-full mb-2" x-text="content.activitiesContent.level2.fillBlanks"></button>
+                        <button @click="startActivity('sentenceMeaning')" class="btn btn-primary w-full" x-text="content.activitiesContent.level2.sentenceMeaning"></button>
+                    </div>
+                    <!-- Level 3 -->
+                    <div class="card p-6 flex flex-col">
+                        <h3 class="text-xl font-bold mb-4 text-teal-600" x-text="content.activitiesContent.level3.title"></h3>
+                        <p class="text-gray-600 mb-4 flex-grow" x-text="content.activitiesContent.level3.description"></p>
+                        <button @click="startActivity('sentenceScramble')" class="btn btn-primary w-full mb-2" x-text="content.activitiesContent.level3.scramble"></button>
+                        <button @click="startActivity('essenceSorter')" class="btn btn-primary w-full" x-text="content.activitiesContent.level3.essenceSorter"></button>
+                    </div>
+                </div>
+
+                <!-- Activity Modal -->
+                <div x-show="currentActivity" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" x-cloak>
+                    <div class="card w-full max-w-3xl max-h-[90vh] overflow-y-auto p-6 relative" @click.away="currentActivity = null">
+                        <button @click="currentActivity = null" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 z-10">
+                            <i class="fas fa-times fa-2x"></i>
+                        </button>
+                        
+                        <!-- Flashcards Activity -->
+                        <div x-show="currentActivity === 'flashcards'">
+                            <h2 class="text-2xl font-bold mb-4 text-center" x-text="content.activities.flashcards.title"></h2>
+                            <div class="flashcard-container" @click="flashcard.isFlipped = !flashcard.isFlipped">
+                                <div class="flashcard" :class="{'is-flipped': flashcard.isFlipped}">
+                                    <div class="flashcard-face flashcard-front">
+                                        <p class="text-2xl font-semibold" x-text="flashcard.current.word"></p>
+                                    </div>
+                                    <div class="flashcard-face flashcard-back">
+                                        <p class="text-xl" x-text="flashcard.current.meaning"></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex justify-between mt-6">
+                                <button @click.stop="prevFlashcard()" class="btn btn-secondary">&lt; <span x-text="content.activities.prev"></span></button>
+                                <span class="self-center text-gray-600" x-text="`${flashcard.index + 1} / ${content.wordMeanings.length}`"></span>
+                                <button @click.stop="nextFlashcard()" class="btn btn-secondary"><span x-text="content.activities.next"></span> &gt;</button>
+                            </div>
+                        </div>
+
+                        <!-- Simple Quiz Activity -->
+                        <div x-show="currentActivity === 'simpleQuiz'">
+                           <h2 class="text-2xl font-bold mb-4" x-text="content.activities.simpleQuiz.title"></h2>
+                           <div x-show="!quiz.completed">
+                               <p class="text-lg mb-4"><span x-text="content.activities.simpleQuiz.question"></span>: <span class="font-bold" x-text="quiz.currentQuestion.word"></span></p>
+                               <div class="space-y-3">
+                                   <template x-for="(option, index) in quiz.currentQuestion.options" :key="index">
+                                       <button @click="checkAnswer('simple', option)" class="btn w-full text-left quiz-option" :class="quiz.answerState[option] || ''" x-text="option" :disabled="quiz.answered"></button>
+                                   </template>
+                               </div>
+                               <div x-show="quiz.answered" class="feedback-box" :class="quiz.feedback.isCorrect ? 'feedback-correct' : 'feedback-incorrect'" x-html="quiz.feedback.text"></div>
+                               <div class="mt-4 text-right">
+                                   <button @click="nextQuestion('simple')" class="btn btn-primary" x-show="quiz.answered" x-text="content.activities.next"></button>
+                               </div>
+                           </div>
+                           <div x-show="quiz.completed">
+                               <h3 class="text-xl font-bold" x-text="content.activities.quizCompleted"></h3>
+                               <p class="text-lg mt-2" x-text="`${content.activities.yourScore}: ${quiz.score} / ${quiz.questions.length}`"></p>
+                               <button @click="startActivity('simpleQuiz')" class="btn btn-primary mt-4" x-text="content.activities.playAgain"></button>
+                           </div>
+                        </div>
+                        
+                        <!-- Match the Column -->
+                        <div x-show="currentActivity === 'matchColumn'">
+                            <h2 class="text-2xl font-bold mb-4" x-text="content.activities.matchColumn.title"></h2>
+                            <div x-show="!match.completed">
+                                <div class="grid md:grid-cols-2 gap-4">
+                                    <!-- Words Column -->
+                                    <div>
+                                        <h3 class="font-bold text-center mb-2" x-text="content.activities.matchColumn.words"></h3>
+                                        <div class="space-y-2">
+                                            <template x-for="(word, index) in match.words" :key="index">
+                                                <button @click="selectMatchItem('word', word)" class="btn w-full text-left" :class="{'btn-primary': match.selectedWord === word, 'bg-gray-100 text-gray-400 line-through': word.matched, 'btn-secondary': match.selectedWord !== word && !word.matched}" x-text="word.word" :disabled="word.matched"></button>
+                                            </template>
+                                        </div>
+                                    </div>
+                                    <!-- Meanings Column -->
+                                    <div>
+                                        <h3 class="font-bold text-center mb-2" x-text="content.activities.matchColumn.meanings"></h3>
+                                        <div class="space-y-2">
+                                            <template x-for="(meaning, index) in match.meanings" :key="index">
+                                                 <button @click="selectMatchItem('meaning', meaning)" class="btn w-full text-left" :class="{'btn-primary': match.selectedMeaning === meaning, 'bg-gray-100 text-gray-400 line-through': meaning.matched, 'btn-secondary': match.selectedMeaning !== meaning && !meaning.matched}" x-text="meaning.meaning" :disabled="meaning.matched"></button>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="text-center mt-4 font-bold h-6" :class="match.feedback.includes(content.activities.matchColumn.correct) ? 'text-green-600' : 'text-red-600'" x-text="match.feedback"></p>
+                            </div>
+                             <div x-show="match.completed">
+                               <h3 class="text-xl font-bold" x-text="content.activities.activityCompleted"></h3>
+                               <p class="text-lg mt-2" x-text="`${content.activities.yourScore}: ${match.score} / ${match.total}`"></p>
+                               <button @click="startActivity('matchColumn')" class="btn btn-primary mt-4" x-text="content.activities.playAgain"></button>
+                           </div>
+                        </div>
+
+                        <!-- Fill in the Blanks -->
+                        <div x-show="currentActivity === 'fillBlanks'">
+                           <h2 class="text-2xl font-bold mb-4" x-text="content.activities.fillBlanks.title"></h2>
+                           <div x-show="!fillBlanks.completed">
+                               <p class="text-lg mb-4" x-html="fillBlanks.currentQuestion.sentence"></p>
+                               <div class="flex flex-wrap gap-2 justify-center">
+                                   <template x-for="(option, index) in fillBlanks.currentQuestion.options" :key="index">
+                                       <button @click="checkAnswer('fill', option)" class="btn quiz-option" :class="fillBlanks.answerState[option] || ''" x-text="option" :disabled="fillBlanks.answered"></button>
+                                   </template>
+                               </div>
+                               <div x-show="fillBlanks.answered" class="feedback-box" :class="fillBlanks.feedback.isCorrect ? 'feedback-correct' : 'feedback-incorrect'" x-html="fillBlanks.feedback.text"></div>
+                               <div class="mt-4 text-right">
+                                   <button @click="nextQuestion('fill')" class="btn btn-primary" x-show="fillBlanks.answered" x-text="content.activities.next"></button>
+                               </div>
+                           </div>
+                           <div x-show="fillBlanks.completed">
+                               <h3 class="text-xl font-bold" x-text="content.activities.quizCompleted"></h3>
+                               <p class="text-lg mt-2" x-text="`${content.activities.yourScore}: ${fillBlanks.score} / ${fillBlanks.questions.length}`"></p>
+                               <button @click="startActivity('fillBlanks')" class="btn btn-primary mt-4" x-text="content.activities.playAgain"></button>
+                           </div>
+                        </div>
+
+                        <!-- Sentence Meaning Quiz -->
+                        <div x-show="currentActivity === 'sentenceMeaning'">
+                           <h2 class="text-2xl font-bold mb-4" x-text="content.activities.sentenceMeaning.title"></h2>
+                           <div x-show="!sentenceMeaning.completed">
+                               <p class="text-lg mb-2 font-semibold" x-text="content.activities.sentenceMeaning.question"></p>
+                               <p class="text-lg mb-4 bg-teal-50 p-3 rounded-lg" x-text="sentenceMeaning.currentQuestion.sentence"></p>
+                               <div class="space-y-3">
+                                   <template x-for="(option, index) in sentenceMeaning.currentQuestion.options" :key="index">
+                                       <button @click="checkAnswer('sentence', option)" class="btn w-full text-left quiz-option h-auto" :class="sentenceMeaning.answerState[option] || ''" :disabled="sentenceMeaning.answered">
+                                            <span x-text="option"></span>
+                                       </button>
+                                   </template>
+                               </div>
+                               <div x-show="sentenceMeaning.answered" class="feedback-box" :class="sentenceMeaning.feedback.isCorrect ? 'feedback-correct' : 'feedback-incorrect'" x-html="sentenceMeaning.feedback.text"></div>
+                               <div class="mt-4 text-right">
+                                   <button @click="nextQuestion('sentence')" class="btn btn-primary" x-show="sentenceMeaning.answered" x-text="content.activities.next"></button>
+                               </div>
+                           </div>
+                           <div x-show="sentenceMeaning.completed">
+                               <h3 class="text-xl font-bold" x-text="content.activities.quizCompleted"></h3>
+                               <p class="text-lg mt-2" x-text="`${content.activities.yourScore}: ${sentenceMeaning.score} / ${sentenceMeaning.questions.length}`"></p>
+                               <button @click="startActivity('sentenceMeaning')" class="btn btn-primary mt-4" x-text="content.activities.playAgain"></button>
+                           </div>
+                        </div>
+
+                        <!-- Sentence Scramble -->
+                        <div x-show="currentActivity === 'sentenceScramble'">
+                            <h2 class="text-2xl font-bold mb-4" x-text="content.activities.sentenceScramble.title"></h2>
+                            <p class="mb-4 text-gray-600" x-text="content.activities.sentenceScramble.instruction"></p>
+                            <div x-show="!scramble.completed">
+                                <div class="card p-4 mb-4 min-h-[60px] bg-gray-100 flex flex-wrap gap-2">
+                                    <template x-for="(word, index) in scramble.userSentence" :key="index">
+                                        <button @click="unselectScrambleWord(word, index)" class="btn btn-primary" x-text="word"></button>
+                                    </template>
+                                </div>
+                                <div class="p-4 flex flex-wrap gap-2 justify-center">
+                                     <template x-for="(word, index) in scramble.wordBank" :key="index">
+                                        <button @click="selectScrambleWord(word, index)" class="btn btn-secondary" x-text="word"></button>
+                                    </template>
+                                </div>
+                                <div class="mt-4 text-center">
+                                     <button @click="checkScramble" class="btn btn-primary" x-text="content.activities.sentenceScramble.check"></button>
+                                     <div x-show="scramble.feedback.text" class="feedback-box" :class="scramble.feedback.isCorrect ? 'feedback-correct' : 'feedback-incorrect'" x-html="scramble.feedback.text"></div>
+                                </div>
+                                <div class="mt-4 text-right">
+                                   <button @click="nextQuestion('scramble')" class="btn btn-primary" x-show="scramble.answered" x-text="content.activities.next"></button>
+                               </div>
+                            </div>
+                            <div x-show="scramble.completed">
+                               <h3 class="text-xl font-bold" x-text="content.activities.quizCompleted"></h3>
+                               <p class="text-lg mt-2" x-text="`${content.activities.yourScore}: ${scramble.score} / ${scramble.questions.length}`"></p>
+                               <button @click="startActivity('sentenceScramble')" class="btn btn-primary mt-4" x-text="content.activities.playAgain"></button>
+                           </div>
+                        </div>
+
+                        <!-- Essence Sorter -->
+                        <div x-show="currentActivity === 'essenceSorter'">
+                            <h2 class="text-2xl font-bold mb-2" x-text="content.activities.essenceSorter.title"></h2>
+                            <p class="mb-4 text-gray-600" x-text="content.activities.essenceSorter.instruction"></p>
+                            <div x-show="!essenceSorter.completed">
+                                <!-- Items to sort -->
+                                <div class="card p-3 mb-4 bg-gray-50">
+                                    <h3 class="font-bold text-center mb-2" x-text="content.activities.essenceSorter.concepts"></h3>
+                                    <div class="flex flex-wrap gap-2 justify-center">
+                                        <template x-for="(concept, index) in essenceSorter.conceptsToPlace" :key="concept.text">
+                                            <button @click="selectSorterConcept(concept)" class="btn btn-secondary sorter-item" :class="{'selected': essenceSorter.selectedConcept === concept}" x-text="concept.text"></button>
+                                        </template>
+                                    </div>
+                                </div>
+                                <!-- Categories -->
+                                <div class="grid md:grid-cols-2 gap-4">
+                                    <template x-for="(category, index) in essenceSorter.categories" :key="index">
+                                        <div @click="placeSorterConcept(category.id)" class="card p-3 sorter-category cursor-pointer hover:bg-teal-50">
+                                            <h3 class="font-bold text-center mb-2 text-teal-700" x-text="category.name"></h3>
+                                            <div class="space-y-1">
+                                                <template x-for="item in essenceSorter.placedConcepts[category.id]" :key="item.text">
+                                                    <div class="bg-green-100 text-green-800 p-2 rounded-md text-sm" x-text="item.text"></div>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                                <p class="text-center mt-4 font-bold h-6" :class="essenceSorter.feedback.includes(content.activities.essenceSorter.correct) ? 'text-green-600' : 'text-red-600'" x-text="essenceSorter.feedback"></p>
+                            </div>
+                            <div x-show="essenceSorter.completed">
+                               <h3 class="text-xl font-bold" x-text="content.activities.activityCompleted"></h3>
+                               <p class="text-lg mt-2" x-text="`${content.activities.yourScore}: ${essenceSorter.score} / ${essenceSorter.total}`"></p>
+                               <button @click="startActivity('essenceSorter')" class="btn btn-primary mt-4" x-text="content.activities.playAgain"></button>
+                           </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Report -->
+            <div x-show="activeTab === 'progress'" x-cloak class="card p-6 md:p-8">
+                <h2 class="text-2xl font-bold mb-6 text-teal-700" x-text="content.progressContent.title"></h2>
+                
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2" x-text="content.activities.simpleQuiz.title"></h3>
+                            <p><span x-text="content.progressContent.highScore"></span>: <span x-text="progress.simpleQuiz.highScore || 0"></span> / <span x-text="progress.simpleQuiz.total || 0"></span></p>
+                        </div>
+                         <div>
+                            <h3 class="text-lg font-semibold mb-2" x-text="content.activities.matchColumn.title"></h3>
+                            <p><span x-text="content.progressContent.highScore"></span>: <span x-text="progress.matchColumn.highScore || 0"></span> / <span x-text="progress.matchColumn.total || 0"></span></p>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2" x-text="content.activities.fillBlanks.title"></h3>
+                            <p><span x-text="content.progressContent.highScore"></span>: <span x-text="progress.fillBlanks.highScore || 0"></span> / <span x-text="progress.fillBlanks.total || 0"></span></p>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold mb-2" x-text="content.activities.sentenceMeaning.title"></h3>
+                            <p><span x-text="content.progressContent.highScore"></span>: <span x-text="progress.sentenceMeaning.highScore || 0"></span> / <span x-text="progress.sentenceMeaning.total || 0"></span></p>
+                        </div>
+                         <div>
+                            <h3 class="text-lg font-semibold mb-2" x-text="content.activities.sentenceScramble.title"></h3>
+                            <p><span x-text="content.progressContent.highScore"></span>: <span x-text="progress.sentenceScramble.highScore || 0"></span> / <span x-text="progress.sentenceScramble.total || 0"></span></p>
+                        </div>
+                         <div>
+                            <h3 class="text-lg font-semibold mb-2" x-text="content.activities.essenceSorter.title"></h3>
+                            <p><span x-text="content.progressContent.highScore"></span>: <span x-text="progress.essenceSorter.highScore || 0"></span> / <span x-text="progress.essenceSorter.total || 0"></span></p>
+                        </div>
+                    </div>
+                
+                <div class="text-center mt-8">
+                    <button @click="resetProgress" class="btn bg-red-600 text-white hover:bg-red-700" x-text="content.progressContent.reset"></button>
+                </div>
+            </div>
+        </main>
+
+        <footer class="text-center mt-12 py-4 border-t border-gray-300">
+            <p class="text-gray-600">મનીષ વી. શાહ: વોટ્સએપ: 94299 26447: (વડોદરા)</p>
+        </footer>
+    </div>
+
+    <script>
+        // --- DATA STORE ---
+        const allData = {
+            translations: {
+                gu: {
+                    title: "નમુત્થુણં સૂત્ર લર્નિંગ એપ",
+                    subtitle: "અર્થ સમજો, જ્ઞાન વધારો અને પ્રગતિ કરો",
+                    nav: { sutra: "સૂત્ર", song: "ગીત", originalText: "મૂળ લખાણ", wordByWord: "શબ્દાર્થ", fullMeaning: "સંપૂર્ણ અર્થ", activities: "પ્રવૃત્તિઓ", progress: "પ્રગતિ રિપોર્ટ" },
+                    sutraContent: { 
+                        title: "નમુત્થુણં સૂત્ર",
+                        lines: [
+                            "નમુત્થુણં અરિહંતાણં ભગવંતાણં,",
+                            "આઇગરાણં તિત્થયરાણં સયંસંબુદ્ધાણં,",
+                            "પુરિસુત્તમાણં, પુરિસસીહાણં, પુરિસવરપુંડરીઆણં, પુરિસવરગંધહત્થીણં,",
+                            "લોગુત્તમાણં, લોગનાહાણં, લોગહિઆણં, લોગપઇવાણં, લોગપજ્જોઅગરાણં,",
+                            "અભયદયાણં, ચક્ખુદયાણં, મગ્ગદયાણં, સરણદયાણં, બોહિદયાણં,",
+                            "ધમ્મદયાણં, ધમ્મદેસયાણં, ધમ્મનાયગાણં, ધમ્મસારહીણં, ધમ્મવરચાઉરંતચક્કવટ્ટીણં,",
+                            "અપ્પડિહયવરનાણદંસણધરાણં, વિયટ્ટછઉમાણં,",
+                            "જિણાણં જાવયાણં, તિન્નાણં તારયાણં, બુદ્ધાણં બોહયાણં, મુત્તાણં મોઅગાણં,",
+                            "સવ્વન્નુણં સવ્વદરિસીણં, સિવમયલમરુઅમણંતમક્ખયમવ્વાબાહમપુણરાવિત્તિ સિદ્ધિગઇનામધેયં ઠાણં સંપત્તાણં,",
+                            "નમો જિણાણં, જિયભયાણં."
+                        ]
+                    },
+                    songContent: {
+                        title: "નમુત્થુણં કાવ્ય સ્તુતિ",
+                        lyricsTitle: "ગીતના શબ્દો",
+                        lyrics: `<p>નમું તમને હે અરિહંત ભગવંત,<br>જેમણે કર્યો છે કર્મોનો અંત,<br>અરિ-શત્રુને હણનારા,<br>ભવ-પાર અમને ઉતારનારા.<br><strong>નમું તમને હે અરિહંત ભગવંત... (૧)</strong></p><p>ધર્મ-પથના આદિ કરનારા,<br>તીરથ સ્થાપી જગને તારનારા,<br>સ્વયં જ્ઞાનને પામ્યા પોતે,<br>ગુરુ વિનાના જ્ઞાન-જ્યોતે.<br><strong>નમું તમને હે અરિહંત ભગવંત... (૨)</strong></p><p>પુરુષોમાં ઉત્તમ આપ ગણાઓ,<br>સિંહ સમા નિર્ભય કહેવાઓ,<br>પવિત્ર પુંડરિક કમળ સમા,<br>ગંધહસ્તી જેમ પાપ શમા.<br><strong>નમું તમને હે અરિહંત ભગવંત... (૩)</strong></p><p>ત્રણે લોકમાં ઉત્તમ સ્વામી,<br>જગના સાચા નાથ, અંતર્યામી,<br>દીપક બની પથ દેખાડો,<br>જ્ઞાન-પ્રકાશે જગ અજવાળો.<br><strong>નમું તમને હે અરિહંત ભગવંત... (૪)</strong></p><p>અભય-દાન દેનારા ત્રાતા,<br>જ્ઞાન-ચક્ષુના આપ જ દાતા,<br>શરણું સાચું સૌને આપો,<br>મોક્ષ-મારગને હૈયે સ્થાપો.<br><strong>નમું તમને હે અરિહંત ભગવંત... (૫)</strong></p><p>ધર્મના સારથિ, ધર્મના નાયક,<br>સર્વ જીવોને છો સુખદાયક,<br>ધર્મ-ચક્રવર્તી કહેવાયા,<br>ચાર ગતિના દુઃખ મિટાવ્યા.<br><strong>નમું તમને હે અરિહંત ભગવંત... (૬)</strong></p><p>પોતે જીત્યા, જગને જીતાડો,<br>પોતે તર્યા, ભવથી તરાડો,<br>મુક્ત થયા, મુક્તિ અપાવો,<br>બુદ્ધ થયા, બોધિ જગાવો.<br><strong>નમું તમને હે અરિહંત ભગવંત... (૭)</strong></p><p>સર્વજ્ઞાની, સર્વને દેખનારા,<br>અજ્ઞાન-પડદા વિદારનારા,<br>પામ્યા સિદ્ધિ અચળ, અનંતા,<br>જ્યાં સુખ શાશ્વત, દુઃખનો અંત આ.<br><strong>નમું તમને હે અરિહંત ભગવંત... (૮)</strong></p><p>જીત્યા ભયને, હે જિનરાયા,<br>વંદન સ્વીકારો, ઓ સુખછાયા,<br>ભાવ ભરીને શીશ નમાવી,<br>ગુણ ગાઉં છું હર્ષિત ભાવી.<br><strong>નમું તમને હે અરિહંત ભગવંત... (૯)</strong></p>`
+                    },
+                    wordByWordContent: { title: "શબ્દ-દર-શબ્દ અર્થ" },
+                    originalTextHTML: `
+                        <h2 class="text-3xl font-bold text-center text-teal-800 mb-6">નમુત્થુણં સૂત્રનો સરળ અર્થ (સ્ટેપ-બાય-સ્ટેપ)</h2>
+                        <div class="explanation-block"><h4>પ્રસ્તાવના:</h4><p>આ સૂત્ર અરિહંત ભગવાનને કરવામાં આવતા નમસ્કાર છે. અરિહંત એટલે જેમણે પોતાના આંતરિક શત્રુઓ (ક્રોધ, માન, માયા, લોભ વગેરે)નો નાશ કર્યો છે. આપણે તેમના ગુણોને યાદ કરીને તેમને વંદન કરીએ છીએ.</p></div>
+                        <h3>૧. નમુત્થુણં અરિહંતાણં ભગવંતાણં</h3><p><strong>અર્થ:</strong> અરિહંત ભગવંતોને મારા નમસ્કાર થાઓ.</p><div class="explanation-block"><h4>સમજૂતી:</h4><ul class="list-disc list-inside space-y-2"><li><strong>નમુત્થુણં:</strong> નમસ્કાર થાઓ / હું સ્તુતિ કરું છું.</li><li><strong>અરિહંતાણં:</strong> 'અરિ' એટલે શત્રુ અને 'હંત' એટલે હણનાર. જેમણે મનની અંદર રહેલા રાગ, દ્વેષ, ક્રોધ, મોહ જેવા શત્રુઓનો નાશ કર્યો છે, તેવા અરિહંતોને.</li><li><strong>ભગવંતાણં:</strong> જે જ્ઞાન, દર્શન, ચારિત્ર અને તપ રૂપી અનંત ઐશ્વર્યથી યુક્ત છે, તેવા ભગવંતોને.</li></ul><h4 class="mt-4">સરળ શબ્દોમાં:</h4><p>હું એવા પરમાત્માને નમસ્કાર કરું છું જેમણે પોતાના બધા જ દોષોનો નાશ કરી દીધો છે અને જે અનંત શક્તિના સ્વામી છે.</p></div>
+                        <h3>૨. આઇગરાણં તિત્થયરાણં સયંસંબુદ્ધાણં</h3><p><strong>અર્થ:</strong> (ધર્મની) આદિ કરનારા, તીર્થની સ્થાપના કરનારા અને સ્વયં જ્ઞાન પામેલા (તેવા ભગવંતોને નમસ્કાર).</p><div class="explanation-block"><h4>સમજૂતી:</h4><ul class="list-disc list-inside space-y-2"><li><strong>આઇગરાણં:</strong> જેઓ પોતાના સમયમાં મોક્ષમાર્ગની શરૂઆત કરે છે, આદિ (શરૂઆત) કરનારા છે.</li><li><strong>તિત્થયરાણં:</strong> જેઓ તીર્થની સ્થાપના કરે છે. 'તીર્થ' એટલે જેના દ્વારા સંસાર સાગર તરી શકાય. સાધુ, સાધ્વી, શ્રાવક અને શ્રાવિકા - આ ચાર અંગોવાળા સંઘને 'તીર્થ' કહેવાય છે.</li><li><strong>સયંસંબુદ્ધાણં:</strong> જેઓ કોઈ ગુરુના ઉપદેશ વિના, પોતાની જાતે જ, સ્વયં જ કેવળજ્ઞાન પામે છે.</li></ul><h4 class="mt-4">સરળ શબ્દોમાં:</h4><p>જેઓ દુનિયાને સાચો રસ્તો બતાવવાની શરૂઆત કરે છે, જેઓ સંઘની સ્થાપના કરે છે અને જેમને જ્ઞાન મેળવવા માટે કોઈ બીજાની જરૂર નથી પડતી, તેવા પરમાત્માને હું વંદન કરું છું.</p></div>
+                        <h3>૩. પુરિસુત્તમાણં, પુરિસસીહાણં, પુરિસવરપુંડરીઆણં, પુરિસવરગંધહત્થીણં</h3><p><strong>અર્થ:</strong> પુરુષોમાં ઉત્તમ, પુરુષોમાં સિંહ સમાન, પુરુષોમાં શ્રેષ્ઠ શ્વેત કમળ જેવા અને પુરુષોમાં શ્રેષ્ઠ ગંધહસ્તી જેવા (ભગવંતોને નમસ્કાર).</p><div class="explanation-block"><h4>સમજૂતી:</h4><p>અહીં ભગવંતની ચાર ઉપમાઓ (સરખામણી) આપી છે.</p><ul class="list-disc list-inside space-y-2"><li><strong>પુરિસુત્તમાણં:</strong> બધા પુરુષો (આત્માઓ) માં જે ઉત્તમ છે.</li><li><strong>પુરિસસીહાણં:</strong> જેમ જંગલમાં સિંહ નિર્ભય અને પરાક્રમી હોય છે, તેમ ભગવાન સંસારમાં નિર્ભય અને સૌથી શક્તિશાળી છે.</li><li><strong>પુરિસવરપુંડરીઆણં:</strong> જેમ સફેદ કમળ (પુંડરિક) કાદવમાં ઉગીને પણ કાદવથી અલિપ્ત અને નિર્મળ રહે છે, તેમ ભગવાન સંસારમાં રહીને પણ કર્મોથી અલિપ્ત રહે છે.</li><li><strong>પુરિસવરગંધહત્થીણં:</strong> ગંધહસ્તી એક વિશિષ્ટ પ્રકારનો હાથી હોય છે જેની ગંધથી બીજા બધા જ પ્રાણીઓ (સિંહ પણ) ભાગી જાય છે. તેમ ભગવાનની હાજરી માત્રથી પાપ અને દુર્ગુણો નાશ પામે છે.</li></ul></div>
+                        <h3>૪. લોગુત્તમાણં, લોગનાહાણં, લોગહિઆણં, લોગપઇવાણં, લોગપજ્જોઅગરાણં</h3><p><strong>અર્થ:</strong> લોકોમાં ઉત્તમ, લોકોના નાથ (રક્ષક), લોકોનું હિત કરનારા, લોકોમાં દીપક સમાન અને લોકોમાં ઉજાસ ફેલાવનારા (ભગવંતોને નમસ્કાર).</p><div class="explanation-block"><h4>સમજૂતી:</h4><ul class="list-disc list-inside space-y-2"><li><strong>લોગુત્તમાણં:</strong> ત્રણેય લોકમાં જે ઉત્તમ છે.</li><li><strong>લોગનાહાણં:</strong> જેઓ લોકોના સાચા નાથ એટલે કે રક્ષક અને માર્ગદર્શક છે.</li><li><strong>લોગહિઆણં:</strong> જેઓ હંમેશા સર્વ જીવોનું હિત (ભલું) ઈચ્છે છે.</li><li><strong>લોગપઇવાણં:</strong> જેમ અંધારામાં દીવો રસ્તો બતાવે છે, તેમ ભગવાન અજ્ઞાનના અંધકારમાં જ્ઞાનનો પ્રકાશ આપે છે.</li><li><strong>લોગપજ્જોઅગરાણં:</strong> જેઓ પોતાના કેવળજ્ઞાન રૂપી સૂર્યથી આખા લોકને પ્રકાશિત કરે છે.</li></ul></div>
+                        <h3>૫. અભયદયાણં, ચક્ખુદયાણં, મગ્ગદયાણં, સરણદયાણં, બોહિદયાણં</h3><p><strong>અર્થ:</strong> અભયનું દાન દેનારા, જ્ઞાનરૂપી ચક્ષુ (આંખ) આપનારા, મોક્ષમાર્ગ દેખાડનારા, શરણ આપનારા અને બોધિ (રત્નત્રયી) આપનારા (ભગવંતોને નમસ્કાર).</p><div class="explanation-block"><h4>સમજૂતી:</h4><ul class="list-disc list-inside space-y-2"><li><strong>અભયદયાણં:</strong> જે જન્મ, મરણ, રોગ વગેરે બધા ભયથી મુક્ત કરે છે, અભયનું દાન આપે છે.</li><li><strong>ચક્ખુદયાણં:</strong> જે આપણને જ્ઞાનરૂપી આંખો આપે છે, જેનાથી આપણે સાચું-ખોટું પારખી શકીએ.</li><li><strong>મગ્ગદયાણં:</strong> જે આપણને મોક્ષનો સાચો માર્ગ બતાવે છે.</li><li><strong>સરણદયાણં:</strong> સંસારમાં ભટકેલા જીવોને જે સાચું શરણ આપે છે.</li><li><strong>બોહિદયાણં:</strong> જે આપણને 'બોધિ' એટલે કે સમ્યક્ દર્શન, જ્ઞાન અને ચારિત્ર (રત્નત્રયી) રૂપી બીજ આપે છે, જેનાથી મોક્ષ મળે છે.</li></ul></div>
+                        <h3>૬. ધમ્મદયાણં, ધમ્મદેસયાણં, ધમ્મનાયગાણં, ધમ્મસારહીણં, ધમ્મવરચાઉરંતચક્કવટ્ટીણં</h3><p><strong>અર્થ:</strong> ધર્મનું દાન દેનારા, ધર્મનો ઉપદેશ આપનારા, ધર્મના નાયક, ધર્મના સારથિ અને ચાર ગતિનો અંત કરનારા શ્રેષ્ઠ ધર્મ-ચક્રવર્તી (ભગવંતોને નમસ્કાર).</p><div class="explanation-block"><h4>સમજૂતી:</h4><ul class="list-disc list-inside space-y-2"><li><strong>ધમ્મદયાણં થી ધમ્મસારહીણં:</strong> તેઓ ધર્મ આપે છે, ધર્મ સમજાવે છે, ધર્મના નેતા છે અને ધર્મ રૂપી રથને ચલાવનાર કુશળ સારથિ છે.</li><li><strong>ધમ્મવરચાઉરંતચક્કવટ્ટીણં:</strong> જેમ ચક્રવર્તી રાજા છ ખંડ પૃથ્વી જીતે છે, તેમ તીર્થંકર ભગવાન ધર્મ-ચક્રવર્તી છે. તેઓ ચાર ગતિ (દેવ, મનુષ્ય, તિર્યંચ, નારકી)નો અંત કરાવીને મોક્ષ રૂપી સામ્રાજ્ય અપાવે છે.</li></ul></div>
+                        <h3>૭. અપ્પડિહયવરનાણદંસણધરાણં, વિયટ્ટછઉમાણં</h3><p><strong>અર્થ:</strong> જેમનું શ્રેષ્ઠ જ્ઞાન અને દર્શન અપ્રતિહત (કોઈ રોકી ન શકે તેવું) છે, અને જેમણે છદ્મ (જ્ઞાન પરના આવરણ)નો નાશ કર્યો છે (તેવા ભગવંતોને નમસ્કાર).</p><div class="explanation-block"><h4>સમજૂતી:</h4><ul class="list-disc list-inside space-y-2"><li><strong>અપ્પડિહયવરનાણદંસણધરાણં:</strong> તેમનું કેવળજ્ઞાન અને કેવળદર્શન એટલું શ્રેષ્ઠ છે કે તેને કોઈ રોકી શકતું નથી. તેઓ એક જ સમયે આખા બ્રહ્માંડને જાણી અને જોઈ શકે છે.</li><li><strong>વિયટ્ટછઉમાણં:</strong> કેવળજ્ઞાન પામતા પહેલાની અજ્ઞાન અવસ્થાને 'છદ્મસ્થ' અવસ્થા કહેવાય છે. ભગવાને એ અવસ્થાનો સંપૂર્ણ નાશ કરી દીધો છે.</li></ul></div>
+                        <h3>૮. જિણાણં જાવયાણં, તિન્નાણં તારયાણં, બુદ્ધાણં બોહયાણં, મુત્તાણં મોઅગાણં</h3><p><strong>અર્થ:</strong> (પોતે) કર્મો પર વિજય મેળવનાર અને બીજાને વિજય અપાવનાર; (પોતે) સંસાર સાગરને તર્યા છે અને બીજાને તારનારા છે; (પોતે) જ્ઞાન પામ્યા છે અને બીજાને જ્ઞાન આપનારા છે; (પોતે) મુક્ત થયા છે અને બીજાને મુક્ત કરનારા છે.</p><div class="explanation-block"><h4>સમજૂતી:</h4><p>આમાં ભગવાનના બેવડા સ્વરૂપનું વર્ણન છે - તેઓ પોતે જે પામ્યા છે, તે જ બીજાને અપાવે છે.</p></div>
+                        <h3>૯. સવ્વન્નુણં સવ્વદરિસીણં, સિવમયલમરુઅમણંતમક્ખયમવ્વાબાહમપુણરાવિત્તિ સિદ્ધિગઇનામધેયં ઠાણં સંપત્તાણં</h3><p><strong>અર્થ:</strong> જે સર્વજ્ઞ (બધું જાણનારા) અને સર્વદર્શી (બધું દેખનારા) છે, તથા શિવ, અચલ, અરુજ, અનંત, અક્ષય, અવ્યાબાધ અને અપુનરાવૃત્તિ એવા સિદ્ધિ ગતિ નામના સ્થાનને પામેલા છે (તેવા ભગવંતોને નમસ્કાર).</p><div class="explanation-block"><h4>સમજૂતી:</h4><p>તેઓ એવા સ્થાન (મોક્ષ) ને પામ્યા છે જે: શિવ, અચલ, અરુજ, અનંત, અક્ષય, અવ્યાબાધ, અને અપુનરાવૃત્તિ છે.</p></div>
+                        <h3>૧０. નમો જિણાણં, જિયભયાણં</h3><p><strong>અર્થ:</strong> જેમણે સર્વ ભયને જીતી લીધા છે, તેવા જિનેશ્વરોને મારા નમસ્કાર હો.</p><div class="explanation-block"><h4>સમજૂતી:</h4><p>અંતમાં ફરીથી એવા જિન ભગવંતોને નમસ્કાર કરવામાં આવ્યા છે, જેમણે જન્મ-મરણ સહિત તમામ પ્રકારના ભય પર વિજય મેળવી લીધો છે.</p></div>
+                        <div class="summary-block"><h4>સારાંશ:</h4><p>"નમુત્થુણં" સૂત્ર એ માત્ર શબ્દોનો સમૂહ નથી, પરંતુ અરિહંત પરમાત્માના અનંત ગુણોની ગાથા છે. તેને સમજીને બોલવાથી આપણા મનમાં ભગવાન પ્રત્યેનો ભક્તિભાવ વધે છે, આપણા વિચારો શુદ્ધ થાય છે અને આપણને પણ તેમના બતાવેલા માર્ગ પર ચાલવાની પ્રેરણા મળે છે.</p></div>
+                    `,
+                    fullMeaningContent: {
+                        title: "સૂત્રનો સંપૂર્ણ અર્થ અને સારાંશ",
+                        paragraphs: [
+                            "આ સૂત્ર અરિહંત ભગવાનને કરવામાં આવતા નમસ્કાર છે. અરિહંત એટલે જેમણે પોતાના આંતરિક શત્રુઓ (ક્રોધ, માન, માયા, લોભ વગેરે)નો નાશ કર્યો છે. આપણે તેમના ગુણોને યાદ કરીને તેમને વંદન કરીએ છીએ.", "તેઓ ધર્મની આદિ કરનારા, તીર્થની સ્થાપના કરનારા અને કોઈ ગુરુ વિના સ્વયં જ્ઞાન પામેલા છે.", "તેમની ચાર ઉપમાઓ આપવામાં આવી છે: પુરુષોમાં ઉત્તમ, સિંહ જેવા નિર્ભય, સફેદ કમળ જેવા નિર્મળ અને ગંધહસ્તી જેવા પ્રભાવશાળી, જેમની હાજરીથી જ પાપ દૂર ભાગે છે.", "તેઓ ત્રણેય લોકમાં ઉત્તમ, સૌના રક્ષક, સૌનું હિત કરનારા, દીપક સમાન માર્ગદર્શક અને જ્ઞાનનો પ્રકાશ ફેલાવનારા છે.", "તેઓ આપણને અભયનું દાન આપે છે, જ્ઞાનરૂપી ચક્ષુ આપે છે, મોક્ષનો માર્ગ બતાવે છે, સાચું શરણ આપે છે અને રત્નત્રયી રૂપી બોધિ આપે છે.", "તેઓ ધર્મના દાતા, ઉપદેશક, નેતા અને સારથિ છે. તેઓ ચાર ગતિના ચક્રનો અંત કરાવી મોક્ષ અપાવનાર ધર્મ-ચક્રવર્તી છે.", "તેમનું જ્ઞાન અને દર્શન અપ્રતિહત છે, જેને કોઈ રોકી શકતું નથી અને તેમણે અજ્ઞાનની અવસ્થાનો સંપૂર્ણ નાશ કર્યો છે.", "તેઓ પોતે કર્મો પર વિજય મેળવી બીજાને વિજય અપાવે છે, પોતે સંસાર સાગર તરી બીજાને તારે છે, પોતે જ્ઞાન પામી બીજાને જ્ઞાન આપે છે અને પોતે મુક્ત થઈ બીજાને મુક્ત કરાવે છે.", "તેઓ સર્વજ્ઞ અને સર્વદર્શી છે અને એવા સિદ્ધિ સ્થાનને પામ્યા છે જે શિવ, અચલ, રોગરહિત, અનંત, અક્ષય, બાધારહિત છે અને જ્યાંથી ફરી જન્મ-મરણના ચક્રમાં આવવાનું નથી.", "જેમણે સર્વ ભયને જીતી લીધા છે, તેવા જિનેશ્વરોને મારા નમસ્કાર હો."
+                        ],
+                        summaryTitle: "સારાંશ",
+                        summary: "\"નમુત્થુણં\" સૂત્ર એ માત્ર શબ્દોનો સમૂહ નથી, પરંતુ અરિહંત પરમાત્માના અનંત ગુણોની ગાથા છે. તેને સમજીને બોલવાથી આપણા મનમાં ભગવાન પ્રત્યેનો ભક્તિભાવ વધે છે, આપણા વિચારો શુદ્ધ થાય છે અને આપણને પણ તેમના બતાવેલા માર્ગ પર ચાલવાની પ્રેરણા મળે છે."
+                    },
+                    activitiesContent: {
+                        title: "તમારી સમજ ચકાસો",
+                        level1: { title: "સ્તર 1: શરૂઆત", description: "મૂળભૂત શબ્દો અને તેમના અર્થો શીખો.", flashcards: "ફ્લેશકાર્ડ્સ", quiz: "સરળ ક્વિઝ" },
+                        level2: { title: "સ્તર 2: મધ્યમ", description: "તમારી સમજને વધુ ઊંડી બનાવો.", match: "જોડકાં જોડો", fillBlanks: "ખાલી જગ્યા પૂરો", sentenceMeaning: "વાક્યનો અર્થ" },
+                        level3: { title: "સ્તર 3: અદ્યતન", description: "તમારા જ્ઞાનને પડકારો.", scramble: "વાક્ય ગોઠવો", essenceSorter: "સૂત્ર સાર વર્ગીકરણ" }
+                    },
+                    progressContent: {
+                        title: "તમારો પ્રગતિ રિપોર્ટ",
+                        overall: "એકંદરે પ્રગતિ",
+                        highScore: "ઉચ્ચતમ સ્કોર",
+                        reset: "પ્રગતિ રીસેટ કરો"
+                    },
+                    wordMeanings: [
+                        { word: "નમુત્થુણં", meaning: "નમસ્કાર થાઓ" }, { word: "અરિહંતાણં", meaning: "અરિ (શત્રુ) ને હણનારા" }, { word: "ભગવંતાણં", meaning: "ઐશ્વર્યથી યુક્ત" }, { word: "આઇગરાણં", meaning: "મોક્ષમાર્ગની આદિ (શરૂઆત) કરનારા" }, { word: "તિત્થયરાણં", meaning: "તીર્થ (સંઘ) ની સ્થાપના કરનારા" }, { word: "સયંસંબુદ્ધાણં", meaning: "સ્વયં જ્ઞાન પામેલા" }, { word: "પુરિસુત્તમાણં", meaning: "પુરુષોમાં ઉત્તમ" }, { word: "પુરિસસીહાણં", meaning: "પુરુષોમાં સિંહ સમાન" }, { word: "પુરિસવરપુંડરીઆણં", meaning: "શ્રેષ્ઠ શ્વેત કમળ જેવા" }, { word: "પુરિસવરગંધહત્થીણં", meaning: "શ્રેષ્ઠ ગંધહસ્તી જેવા" }, { word: "લોગુત્તમાણં", meaning: "લોકમાં ઉત્તમ" }, { word: "લોગનાહાણં", meaning: "લોકોના નાથ (રક્ષક)" }, { word: "લોગહિઆણં", meaning: "લોકોનું હિત કરનારા" }, { word: "લોગપઇવાણં", meaning: "લોકોમાં દીપક સમાન" }, { word: "લોગપજ્જોઅગરાણં", meaning: "લોકોમાં ઉજાસ ફેલાવનારા" }, { word: "અભયદયાણં", meaning: "અભયનું દાન દેનારા" }, { word: "ચક્ખુદયાણં", meaning: "જ્ઞાનરૂપી ચક્ષુ (આંખ) આપનારા" }, { word: "મગ્ગદયાણં", meaning: "મોક્ષમાર્ગ દેખાડનારા" }, { word: "સરણદયાણં", meaning: "શરણ આપનારા" }, { word: "બોહિદયાણં", meaning: "બોધિ (રત્નત્રયી) આપનારા" }, { word: "ધમ્મદયાણં", meaning: "ધર્મનું દાન દેનારા" }, { word: "ધમ્મદેસયાણં", meaning: "ધર્મનો ઉપદેશ આપનારા" }, { word: "ધમ્મનાયગાણં", meaning: "ધર્મના નાયક" }, { word: "ધમ્મસારહીણં", meaning: "ધર્મના સારથિ" }, { word: "ધમ્મવરચાઉરંતચક્કવટ્ટીણં", meaning: "શ્રેષ્ઠ ધર્મ-ચક્રવર્તી" }, { word: "અપ્પડિહયવરનાણદંસણધરાણં", meaning: "અપ્રતિહત જ્ઞાન-દર્શન ધારણ કરનારા" }, { word: "વિયટ્ટછઉમાણં", meaning: "છદ્મ (આવરણ) નો નાશ કરનારા" }, { word: "જિણાણં", meaning: "કર્મો પર વિજય મેળવનાર" }, { word: "જાવયાણં", meaning: "બીજાને વિજય અપાવનાર" }, { word: "તિન્નાણં", meaning: "સંસાર સાગરને તર્યા છે" }, { word: "તારયાણં", meaning: "બીજાને તારનારા છે" }, { word: "બુદ્ધાણં", meaning: "જ્ઞાન પામ્યા છે" }, { word: "બોહયાણં", meaning: "બીજાને જ્ઞાન આપનારા છે" }, { word: "મુત્તાણં", meaning: "મુક્ત થયા છે" }, { word: "મોઅગાણં", meaning: "બીજાને મુક્ત કરનારા છે" }, { word: "સવ્વન્નુણં", meaning: "સર્વજ્ઞ (બધું જાણનારા)" }, { word: "સવ્વદરિસીણં", meaning: "સર્વદર્શી (બધું દેખનારા)" }, { word: "જિયભયાણં", meaning: "સર્વ ભયને જીતી લીધા છે" }
+                    ],
+                    activities: {
+                        prev: "પહેલાનું", next: "આગળ", quizCompleted: "ક્વિઝ પૂર્ણ!", activityCompleted: "પ્રવૃત્તિ પૂર્ણ!", yourScore: "તમારો સ્કોર", playAgain: "ફરીથી રમો",
+                        flashcards: { title: "ફ્લેશકાર્ડ્સ" },
+                        simpleQuiz: { title: "સરળ ક્વિઝ", question: "આ શબ્દનો અર્થ શું છે?", correct: "સાચું!", incorrect: "ખોટું." },
+                        matchColumn: { title: "જોડકાં જોડો", words: "શબ્દો", meanings: "અર્થ", correct: "સાચું!", incorrect: "ખોટું! ફરી પ્રયાસ કરો." },
+                        fillBlanks: { title: "ખાલી જગ્યા પૂરો", correct: "સાચું!", incorrect: "ખોટું." },
+                        sentenceMeaning: { title: "વાક્ય અર્થ ક્વિઝ", question: "નીચેના વાક્યનો સાચો અર્થ પસંદ કરો:", correct: "સરસ! સાચો જવાબ.", incorrect: "ફરી પ્રયાસ કરો." },
+                        sentenceScramble: { title: "વાક્ય ગોઠવો", instruction: "સાચું વાક્ય બનાવવા માટે શબ્દોને યોગ્ય ક્રમમાં ગોઠવો.", check: "ચકાસો", correct: "સરસ! સાચો જવાબ.", incorrect: "ફરી પ્રયાસ કરો." },
+                        essenceSorter: { title: "સૂત્ર સાર વર્ગીકરણ", instruction: "ખ્યાલ પસંદ કરો અને પછી તેને યોગ્ય શ્રેણીમાં મૂકો.", concepts: "વર્ગીકૃત કરવાના ખ્યાલો", categories: "શ્રેણીઓ", correct: "સાચું!", incorrect: "ખોટું! ફરી પ્રયાસ કરો." }
+                    }
+                },
+                hi: {
+                    title: "नमुत्थुणं सूत्र लर्निंग ऐप",
+                    subtitle: "अर्थ समझें, ज्ञान बढ़ाएं और प्रगति करें",
+                    nav: { sutra: "सूत्र", song: "गीत", originalText: "मूल पाठ", wordByWord: "शब्दार्थ", fullMeaning: "संपूर्ण अर्थ", activities: "गतिविधियाँ", progress: "प्रगति रिपोर्ट" },
+                    sutraContent: { 
+                        title: "नमुत्थुणं सूत्र",
+                        lines: [
+                            "नमुत्थुणं अरिहंताणं भगवंताणं,",
+                            "आइगराणं तित्थयराणं सयंसंबुद्धाणं,",
+                            "पुरिसुत्तमाणं, पुरिससीहाणं, पुरिसवरपुंडरीआणं, पुरिसवरगंधहत्थीणं,",
+                            "लोगुत्तमाणं, लोगनाहाणं, लोगहिआणं, लोगपईवाणं, लोगपज्जोअगराणं,",
+                            "अभयदयाणं, चक्खुदयाणं, मग्गदयाणं, सरणदयाणं, बोहिदयाणं,",
+                            "धम्मदयाणं, धम्मदेसयाणं, धम्मनायगाणं, धम्मसारहीणं, धम्मवरचाउरंतचक्कवट्टीणं,",
+                            "अप्पडिहयवरनाणदंसणधराणं, वियट्टछउमाणं,",
+                            "जिणाणं जावयाणं, तिन्नाणं तारयाणं, बुद्धाणं बोहयाणं, मुत्ताणं मोअगाणं,",
+                            "सव्वन्नुणं सव्वदरिसीणं, सिवमयलमरुअमणंतमक्खयमव्वाबाधमपुणरावित्ति सिद्धिगइनामधेयं ठाणं संपत्ताणं,",
+                            "नमो जिणाणं, जियभयाणं."
+                        ]
+                    },
+                     songContent: {
+                        title: "नमुत्थुणं काव्य स्तुति",
+                        lyricsTitle: "गीत के बोल",
+                        lyrics: `<p>નમું તમને હે અરિહંત ભગવંત,<br>જેમણે કર્યો છે કર્મોનો અંત,<br>અરિ-શત્રુને હણનારા,<br>ભવ-પાર અમને ઉતારનારા.<br><strong>નમું તમને હે અરિહંત ભગવંત... (૧)</strong></p><p>ધર્મ-પથના આદિ કરનારા,<br>તીરથ સ્થાપી જગને તારનારા,<br>સ્વયં જ્ઞાનને પામ્યા પોતે,<br>ગુરુ વિનાના જ્ઞાન-જ્યોતે.<br><strong>નમું તમને હે અરિહંત ભગવંત... (૨)</strong></p><p>પુરુષોમાં ઉત્તમ આપ ગણાઓ,<br>સિંહ સમા નિર્ભય કહેવાઓ,<br>પવિત્ર પુંડરિક કમળ સમા,<br>ગંધહસ્તી જેમ પાપ શમા.<br><strong>નમું તમને હે અરિહંત ભગવંત... (૩)</strong></p><p>ત્રણે લોકમાં ઉત્તમ સ્વામી,<br>જગના સાચા નાથ, અંતર્યામી,<br>દીપક બની પથ દેખાડો,<br>જ્ઞાન-પ્રકાશે જગ અજવાળો.<br><strong>નમું તમને હે અરિહંત ભગવંત... (૪)</strong></p><p>અભય-દાન દેનારા ત્રાતા,<br>જ્ઞાન-ચક્ષુના આપ જ દાતા,<br>શરણું સાચું સૌને આપો,<br>મોક્ષ-મારગને હૈયે સ્થાપો.<br><strong>નમું તમને હે અરિહંત ભગવંત... (૫)</strong></p><p>ધર્મના સારથિ, ધર્મના નાયક,<br>સર્વ જીવોને છો સુખદાયક,<br>ધર્મ-ચક્રવર્તી કહેવાયા,<br>ચાર ગતિના દુઃખ મિટાવ્યા.<br><strong>નમું તમને હે અરિહંત ભગવંત... (૬)</strong></p><p>પોતે જીત્યા, જગને જીતાડો,<br>પોતે તર્યા, ભવથી તરાડો,<br>મુક્ત થયા, મુક્તિ અપાવો,<br>બુદ્ધ થયા, બોધિ જગાવો.<br><strong>નમું તમને હે અરિહંત ભગવંત... (૭)</strong></p><p>સર્વજ્ઞાની, સર્વને દેખનારા,<br>અજ્ઞાન-પડદા વિદારનારા,<br>પામ્યા સિદ્ધિ અચળ, અનંતા,<br>જ્યાં સુખ શાશ્વત, દુઃખનો અંત આ.<br><strong>નમું તમને હે અરિહંત ભગવંત... (૮)</strong></p><p>જીત્યા ભયને, હે જિનરાયા,<br>વંદન સ્વીકારો, ઓ સુખછાયા,<br>ભાવ ભરીને શીશ નમાવી,<br>ગુણ ગાઉં છું હર્ષિત ભાવી.<br><strong>નમું તમને હે અરિહંત ભગવંત... (૯)</strong></p>`
+                    },
+                    wordByWordContent: { title: "शब्द-दर-शब्द अर्थ" },
+                    originalTextHTML: `
+                        <h2 class="text-3xl font-bold text-center text-teal-800 mb-6">नमुत्थुणं सूत्र का सरल अर्थ (स्टेप-बाय-स्टेप)</h2>
+                        <div class="explanation-block"><h4>प्रस्तावना:</h4><p>यह सूत्र अरिहंत भगवान को किए जाने वाले नमस्कार हैं। अरिहंत का अर्थ है जिन्होंने अपने आंतरिक शत्रुओं (क्रोध, मान, माया, लोभ आदि) का नाश कर दिया है। हम उनके गुणों को याद करके उन्हें वंदन करते हैं।</p></div>
+                        <h3>१. नमुत्थुणं अरिहंताणं भगवंताणं</h3><p><strong>अर्थ:</strong> अरिहंत भगवंतों को मेरा नमस्कार हो।</p><div class="explanation-block"><h4>समझाना:</h4><ul class="list-disc list-inside space-y-2"><li><strong>नमुत्थुणं:</strong> नमस्कार हो / मैं स्तुति करता हूं।</li><li><strong>अरिहंताणं:</strong> 'अरि' यानी शत्रु और 'हंत' यानी मारने वाला। जिन्होंने मन के भीतर के राग, द्वेष, क्रोध, मोह जैसे शत्रुओं का नाश किया है, उन अरिહંતों को।</li><li><strong>भगवंताणं:</strong> जो ज्ञान, दर्शन, चारित्र और तप रूपी अनंत ऐश्वर्य से युक्त हैं, उन भगवंतों को।</li></ul></div>
+                        <h3>२. आइगराणं तित्थयराणं सयंसंबुद्धाणं</h3><p><strong>अर्थ:</strong> (धर्म की) आदि करने वाले, तीर्थ की स्थापना करने वाले और स्वयं ज्ञान प्राप्त करने वाले (उन भगवंतों को नमस्कार)।</p><div class="explanation-block"><h4>समझाना:</h4><ul class="list-disc list-inside space-y-2"><li><strong>आइगराणं:</strong> जो अपने समय में मोक्षमार्ग की शुरुआत करते हैं, आदि (शुरुआत) करने वाले हैं।</li><li><strong>तित्थयराणं:</strong> जो तीर्थ की स्थापना करते हैं।</li><li><strong>सयंसंबुद्धाणं:</strong> जो किसी गुरु के उपदेश के बिना, अपने आप ही, स्वयं ही केवलज्ञान प्राप्त करते हैं।</li></ul></div>
+                        <h3>३. पुरिसुत्तमाणं, पुरिससीहाणं, पुरिसवरपुंडरीआणं, पुरिसवरगंधहत्थीणं</h3><p><strong>अर्थ:</strong> पुरुषों में उत्तम, पुरुषों में सिंह के समान, पुरुषों में श्रेष्ठ श्वेत कमल के समान और पुरुषों में श्रेष्ठ गंधहस्ती के समान (भगवंतों को नमस्कार)।</p><div class="explanation-block"><h4>समझाना:</h4><ul class="list-disc list-inside space-y-2"><li><strong>पुरिसुत्तमाणं:</strong> सभी पुरुषों (आत्माओं) में जो उत्तम हैं।</li><li><strong>पुरिससीहाणं:</strong> जैसे जंगल में सिंह निडर और पराक्रमी होता है, वैसे ही भगवान संसार में निडर और सबसे शक्तिशाली हैं।</li><li><strong>पुरिसवरपुंडरीआणं:</strong> जैसे सफेद कमल कीचड़ में उगकर भी कीचड़ से अछूता और निर्मल रहता है, वैसे ही भगवान संसार में रहकर भी कर्मों से अछूते रहते हैं।</li><li><strong>पुरिसवरगंधहत्थीणं:</strong> गंधहस्ती एक विशेष प्रकार का हाथी होता है जिसकी गंध से अन्य सभी जानवर (यहां तक कि सिंह भी) भाग जाते हैं। उसी प्रकार, भगवान की उपस्थिति मात्र से पाप और अवगुण नष्ट हो जाते हैं।</li></ul></div>
+                        <h3>४. लोगुत्तमाणं, लोगनाहाणं, लोगहिआणं, लोगपईवाणं, लोगपज्जोअगराणं</h3><p><strong>अर्थ:</strong> लोकों में उत्तम, लोकों के नाथ (रक्षक), लोकों का हित करने वाले, लोकों में दीपक के समान और लोकों में प्रकाश फैलाने वाले (भगवंतों को नमस्कार)।</p><div class="explanation-block"><h4>समझाना:</h4><ul class="list-disc list-inside space-y-2"><li><strong>लोगुत्तमाणं:</strong> तीनों लोकों में जो उत्तम हैं।</li><li><strong>लोगनाहाणं:</strong> जो लोगों के सच्चे नाथ यानी रक्षक और मार्गदर्शक हैं।</li><li><strong>लोगहिआणं:</strong> जो हमेशा सभी जीवों का हित (भला) चाहते हैं।</li><li><strong>लोगपईवाणं:</strong> जैसे अंधेरे में दीपक रास्ता दिखाता है, वैसे ही भगवान अज्ञान के अंधकार में ज्ञान का प्रकाश देते हैं।</li><li><strong>लोगपज्जोअगराणं:</strong> जो अपने केवलज्ञान रूपी सूर्य से पूरे लोक को प्रकाशित करते हैं।</li></ul></div>
+                        <h3>५. अभयदयाणं, चक्खुदयाणं, मग्गदयाणं, सरणदयाणं, बोहिदयाणं</h3><p><strong>अर्थ:</strong> अभय का दान देने वाले, ज्ञानरूपी चक्षु (आंख) देने वाले, मोक्षमार्ग दिखाने वाले, शरण देने वाले और बोधि (रत्नत्रयी) देने वाले (भगवंतों को नमस्कार)।</p><div class="explanation-block"><h4>समझाना:</h4><ul class="list-disc list-inside space-y-2"><li><strong>अभयदयाणं:</strong> जो जन्म, मृत्यु, रोग आदि सभी भयों से मुक्त करते हैं, अभय का दान देते हैं।</li><li><strong>चक्खुदयाणं:</strong> जो हमें ज्ञानरूपी आंखें देते हैं, जिससे हम सही-गलत में भेद कर सकते हैं।</li><li><strong>मग्गदयाणं:</strong> जो हमें मोक्ष का सही मार्ग दिखाते हैं।</li><li><strong>सरणदयाणं:</strong> जो संसार में भटके हुए जीवों को सच्ची शरण देते हैं।</li><li><strong>बोहिदयाणं:</strong> जो हमें 'बोधि' यानी सम्यक दर्शन, ज्ञान और चारित्र (रत्नत्रयी) रूपी बीज देते हैं, जिससे मोक्ष मिलता है।</li></ul></div>
+                        <h3>६. धम्मदयाणं, धम्मदेसयाणं, धम्मनायगाणं, धम्मसारहीणं, धम्मवरचाउरंतचक्कवट्टीणं</h3><p><strong>अर्थ:</strong> धर्म का दान देने वाले, धर्म का उपदेश देने वाले, धर्म के नायक, धर्म के सारथी और चार गतियों का अंत करने वाले श्रेष्ठ धर्म-चक्रवर्ती (भगवंतों को नमस्कार)।</p><div class="explanation-block"><h4>समझाना:</h4><ul class="list-disc list-inside space-y-2"><li><strong>धम्मदयाणं से धम्मसारहीणं:</strong> वे धर्म देते हैं, धर्म समझाते हैं, धर्म के नेता हैं और धर्म रूपी रथ को चलाने वाले कुशल सारथी हैं।</li><li><strong>धम्मवरचाउरंतचक्कवट्टीणं:</strong> जैसे चक्रवर्ती राजा छह खंड पृथ्वी जीतता है, वैसे ही तीर्थंकर भगवान धर्म-चक्रवर्ती हैं। वे चार गतियों (देव, मनुष्य, तिर्यंच, नारकी) का अंत कराकर मोक्ष रूपी साम्राज्य दिलाते हैं।</li></ul></div>
+                        <h3>७. अप्पडिहयवरनाणदंसणधराणं, वियट्टछउमाणं</h3><p><strong>अर्थ:</strong> जिनका श्रेष्ठ ज्ञान और दर्शन अप्रतिहत (जिसे कोई रोक न सके) है, और जिन्होंने छद्म (ज्ञान पर के आवरण) का नाश कर दिया है (उन भगवंतों को नमस्कार)।</p><div class="explanation-block"><h4>समझाना:</h4><ul class="list-disc list-inside space-y-2"><li><strong>अप्पडिहयवरनाणदंसणधराणं:</strong> उनका केवलज्ञान और केवलदर्शन इतना श्रेष्ठ है कि उसे कोई रोक नहीं सकता। वे एक ही समय में पूरे ब्रह्मांड को जान और देख सकते हैं।</li><li><strong>वियट्टछउमाणं:</strong> केवलज्ञान प्राप्त करने से पहले की अज्ञान अवस्था को 'छद्मस्थ' अवस्था कहा जाता है। भगवान ने उस अवस्था का संपूर्ण नाश कर दिया है।</li></ul></div>
+                        <h3>८. जिणाणं जावयाणं, तिन्नाणं तारयाणं, बुद्धाणं बोहयाणं, मुत्ताणं मोअगाणं</h3><p><strong>अर्थ:</strong> (स्वयं) कर्मों पर विजय प्राप्त करने वाले और दूसरों को विजय दिलाने वाले; (स्वयं) संसार सागर को पार कर चुके हैं और दूसरों को पार कराने वाले हैं; (स्वयं) ज्ञान प्राप्त कर चुके हैं और दूसरों को ज्ञान देने वाले हैं; (स्वयं) मुक्त हो चुके हैं और दूसरों को मुक्त करने वाले हैं।</p><div class="explanation-block"><h4>समझाना:</h4><p>इसमें भगवान के दोहरे स्वरूप का वर्णन है - वे जो स्वयं प्राप्त कर चुके हैं, वही दूसरों को दिलाते हैं।</p></div>
+                        <h3>९. सव्वन्नुणं सव्वदरिसीणं, सिवमयलमरुअमणंतमक्खयमव्वाबाधमपुणरावित्ति सिद्धिगइनामधेयं ठाणं संपत्ताणं</h3><p><strong>अर्थ:</strong> जो सर्वज्ञ (सब कुछ जानने वाले) और सर्वदर्शी (सब कुछ देखने वाले) हैं, तथा शिव, अचल, अरुज, अनंत, अक्षय, अव्याबाध और अपुनरावृत्ति ऐसे सिद्धि गति नामक स्थान को प्राप्त हुए हैं (उन भगवंतों को नमस्कार)।</p><div class="explanation-block"><h4>समझाना:</h4><p>वे ऐसे स्थान (मोक्ष) को प्राप्त हुए हैं जो: शिव, अचल, अरुज, अनंत, अक्षय, अव्याबाध, और अपुनरावृत्ति है।</p></div>
+                        <h3>१०. नमो जिणाणं, जियभयाणं</h3><p><strong>अर्थ:</strong> जिन्होंने सभी भयों को जीत लिया है, उन जिनेश्वरों को मेरा नमस्कार हो।</p><div class="explanation-block"><h4>समझाना:</h4><p>अंत में फिर से उन जिन भगवंतों को नमस्कार किया गया है, जिन्होंने जन्म-मरण सहित सभी प्रकार के भयों पर विजय प्राप्त कर ली है।</p></div>
+                        <div class="summary-block"><h4>सारांश:</h4><p>"नमुत्थुणं" सूत्र केवल शब्दों का समूह नहीं है, बल्कि अरिहंत परमात्मा के अनंत गुणों की गाथा है। इसे समझकर बोलने से हमारे मन में भगवान के प्रति भक्ति भाव बढ़ता है, हमारे विचार शुद्ध होते हैं और हमें भी उनके दिखाए मार्ग पर चलने की प्रेरणा मिलती है।</p></div>
+                    `,
+                    fullMeaningContent: {
+                        title: "सूत्र का संपूर्ण अर्थ और सारांश",
+                        paragraphs: [
+                            "यह सूत्र अरिहंत भगवान को किए जाने वाले नमस्कार हैं। अरिहंत का अर्थ है जिन्होंने अपने आंतरिक शत्रुओं (क्रोध, मान, माया, लोभ आदि) का नाश कर दिया है। हम उनके गुणों को याद करके उन्हें वंदन करते हैं।", "वे धर्म की शुरुआत करने वाले, तीर्थ की स्थापना करने वाले और बिना किसी गुरु के स्वयं ज्ञान प्राप्त करने वाले हैं।", "उनकी चार उपमाएँ दी गई हैं: पुरुषों में उत्तम, सिंह के समान निडर, सफेद कमल के समान निर्मल और गंधहस्ती के समान प्रभावशाली, जिनकी उपस्थिति मात्र से पाप दूर भाग जाते हैं।", "वे तीनों लोकों में उत्तम, सबके रक्षक, सबका हित करने वाले, दीपक के समान मार्गदर्शक और ज्ञान का प्रकाश फैलाने वाले हैं।", "वे हमें अभय का दान देते हैं, ज्ञान रूपी चक्षु देते हैं, मोक्ष का मार्ग दिखाते हैं, सच्चा आश्रय देते हैं और रत्नत्रयी रूपी बोधि प्रदान करते हैं।", "वे धर्म के दाता, उपदेशक, नेता और सारथी हैं। वे चार गतियों के चक्र का अंत कराकर मोक्ष दिलाने वाले धर्म-चक्रवर्ती हैं।", "उनका ज्ञान और दर्शन अप्रतिहत है, जिसे कोई रोक नहीं सकता और उन्होंने अज्ञान की अवस्था का संपूर्ण नाश कर दिया है।", "वे स्वयं कर्मों पर विजय प्राप्त कर दूसरों को विजय दिलाते हैं, स्वयं संसार सागर तैरकर दूसरों को पार कराते हैं, स्वयं ज्ञान प्राप्त कर दूसरों को ज्ञान देते हैं और स्वयं मुक्त होकर दूसरों को मुक्त कराते हैं।", "वे सर्वज्ञ और सर्वदर्शी हैं और ऐसे सिद्धि स्थान को प्राप्त हुए हैं जो शिव, अचल, रोगरहित, अनंत, अक्षय, बाधा रहित है और जहाँ से फिर जन्म-मरण के चक्र में वापस नहीं आना है।", "जिन्होंने सभी भयों को जीत लिया है, उन जिनेश्वरों को मेरा नमस्कार हो।"
+                        ],
+                        summaryTitle: "सारांश",
+                        summary: "\"नमुत्थुणं\" सूत्र केवल शब्दों का समूह नहीं है, बल्कि अरिहंत परमात्मा के अनंत गुणों की गाथा है। इसे समझकर बोलने से हमारे मन में भगवान के प्रति भक्ति भाव बढ़ता है, हमारे विचार शुद्ध होते हैं और हमें भी उनके दिखाए मार्ग पर चलने की प्रेरणा मिलती है।"
+                    },
+                    activitiesContent: {
+                        title: "अपनी समझ का परीक्षण करें",
+                        level1: { title: "स्तर 1: आरंभ", description: "मूल शब्द और उनके अर्थ सीखें।", flashcards: "फ्लैशकार्ड", quiz: "सरल प्रश्नोत्तरी" },
+                        level2: { title: "स्तर 2: मध्यम", description: "अपनी समझ को और गहरा करें।", match: "मिलान करें", fillBlanks: "रिक्त स्थान भरें", sentenceMeaning: "वाक्य का अर्थ" },
+                        level3: { title: "स्तर 3: उन्नत", description: "अपने ज्ञान को चुनौती दें।", scramble: "वाक्य व्यवस्थित करें", essenceSorter: "सूत्र सार वर्गीकरण" }
+                    },
+                    progressContent: {
+                        title: "आपकी प्रगति रिपोर्ट",
+                        overall: "समग्र प्रगति",
+                        highScore: "उच्चतम स्कोर",
+                        reset: "प्रगति रीसेट करें"
+                    },
+                    wordMeanings: [
+                        { word: "नमुत्थुणं", meaning: "नमस्कार हो" }, { word: "अरिहंताणं", meaning: "अरि (शत्रु) का हनन करने वाले" }, { word: "भगवंताणं", meaning: "ऐश्वर्य से युक्त" }, { word: "आइगराणं", meaning: "मोक्षमार्ग का आरंभ करने वाले" }, { word: "तित्थयराणं", meaning: "तीर्थ (संघ) की स्थापना करने वाले" }, { word: "सयंसंबुद्धाणं", meaning: "स्वयं ज्ञान प्राप्त करने वाले" }, { word: "पुरिसुत्तमाणं", meaning: "पुरुषों में उत्तम" }, { word: "पुरिससीहाणं", meaning: "पुरुषों में सिंह के समान" }, { word: "पुरिसवरपुंडरीआणं", meaning: "श्रेष्ठ श्वेत कमल के समान" }, { word: "पुरिसवरगंधहत्थीणं", meaning: "श्रेष्ठ गंधहस्ती के समान" }, { word: "लोगुत्तमाणं", meaning: "लोक में उत्तम" }, { word: "लोगनाहाणं", meaning: "लोगों के नाथ (रक्षक)" }, { word: "लोगहिआणं", meaning: "लोगों का हित करने वाले" }, { word: "लोगपईवाणं", meaning: "लोगों में दीपक के समान" }, { word: "लोगपज्जोअगराणं", meaning: "लोगों में प्रकाश फैलाने वाले" }, { word: "अभयदयाणं", meaning: "अभय का दान देने वाले" }, { word: "चक्खुदयाणं", meaning: "ज्ञानरूपी चक्षु (आंख) देने वाले" }, { word: "मग्गदयाणं", meaning: "मोक्षमार्ग दिखाने वाले" }, { word: "सरणदयाणं", meaning: "शरण देने वाले" }, { word: "बोहिदयाणं", meaning: "बोधि (रत्नत्रयी) देने वाले" }, { word: "धम्मदयाणं", meaning: "धर्म का दान देने वाले" }, { word: "धम्मदेसयाणं", meaning: "धर्म का उपदेश देने वाले" }, { word: "धम्मनायगाणं", meaning: "धर्म के नायक" }, { word: "धम्मसारहीणं", meaning: "धर्म के सारथी" }, { word: "धम्मवरचाउरंतचक्कवट्टीणं", meaning: "श्रेष्ठ धर्म-चक्रवर्ती" }, { word: "अप्पडिहयवरनाणदंसणधराणं", meaning: "अप्रतिहत ज्ञान-दर्शन धारण करने वाले" }, { word: "वियट्टछउमाणं", meaning: "छद्म (आवरण) का नाश करने वाले" }, { word: "जिणाणं", meaning: "कर्मों पर विजय प्राप्त करने वाले" }, { word: "जावयाणं", meaning: "दूसरों को विजय दिलाने वाले" }, { word: "तिन्नाणं", meaning: "संसार सागर को तैर गए" }, { word: "तारयाणं", meaning: "दूसरों को तारने वाले" }, { word: "बुद्धाणं", meaning: "ज्ञान प्राप्त कर चुके" }, { word: "बोहयाणं", meaning: "दूसरों को ज्ञान देने वाले" }, { word: "मुत्ताणं", meaning: "मुक्त हो चुके" }, { word: "मोअगाणं", meaning: "दूसरों को मुक्त करने वाले" }, { word: "सव्वन्नुणं", meaning: "सर्वज्ञ (सब कुछ जानने वाले)" }, { word: "सव्वदरिसीणं", meaning: "सर्वदर्शी (सब कुछ देखने वाले)" }, { word: "जियभयाणं", meaning: "सभी भयों को जीत लिया है" }
+                    ],
+                    activities: {
+                        prev: "पिछला", next: "अगला", quizCompleted: "प्रश्नोत्तरी पूर्ण!", activityCompleted: "गतिविधि पूर्ण!", yourScore: "आपका स्कोर", playAgain: "फिर से खेलें",
+                        flashcards: { title: "फ्लैशकार्ड" },
+                        simpleQuiz: { title: "सरल प्रश्नोत्तरी", question: "इस शब्द का क्या अर्थ है?", correct: "सही!", incorrect: "गलत।" },
+                        matchColumn: { title: "मिलान करें", words: "शब्द", meanings: "अर्थ", correct: "सही!", incorrect: "गलत! फिर से प्रयास करें।" },
+                        fillBlanks: { title: "रिक्त स्थान भरें", correct: "सही!", incorrect: "गलत।" },
+                        sentenceMeaning: { title: "वाक्य अर्थ प्रश्नोत्तरी", question: "निम्नलिखित वाक्य का सही अर्थ चुनें:", correct: "बहुत बढ़िया! सही जवाब।", incorrect: "फिर से प्रयास करें।" },
+                        sentenceScramble: { title: "वाक्य व्यवस्थित करें", instruction: "सही वाक्य बनाने के लिए शब्दों को सही क्रम में रखें।", check: "जांचें", correct: "बहुत बढ़िया! सही जवाब।", incorrect: "फिर से प्रयास करें।" },
+                        essenceSorter: { title: "सूत्र सार वर्गीकरण", instruction: "अवधारणा का चयन करें और फिर उसे सही श्रेणी में रखें।", concepts: "वर्गीकृत करने के लिए अवधारणाएं", categories: "श्रेणियाँ", correct: "सही!", incorrect: "गलत! फिर से प्रयास करें।" }
+                    }
+                },
+                en: {
+                    title: "Namutthunam Sutra Learning App",
+                    subtitle: "Understand the Meaning, Enhance Knowledge, and Track Progress",
+                    nav: { sutra: "Sutra", song: "Song", originalText: "Original Text", wordByWord: "Word by Word", fullMeaning: "Full Meaning", activities: "Activities", progress: "Progress Report" },
+                    sutraContent: { 
+                        title: "Namutthunam Sutra",
+                        lines: [
+                            "Ṇamut'thuṇaṁ arihantāṇaṁ bhagavantāṇaṁ,",
+                            "Āigarāṇaṁ titthayarāṇaṁ sayaṁsambuddhāṇaṁ,",
+                            "Purisuttamāṇaṁ, purisasīhāṇaṁ, purisavarapuṇḍarīāṇaṁ, purisavaragandhahatthīṇaṁ,",
+                            "Loguttamāṇaṁ, loganāhāṇaṁ, logahiāṇaṁ, logapaīvāṇaṁ, logapajjoagarāṇaṁ,",
+                            "Abhayadayāṇaṁ, cakkhudayāṇaṁ, maggadayāṇaṁ, saraṇadayāṇaṁ, bohi­dayāṇaṁ,",
+                            "Dhammadayāṇaṁ, dhammadesayāṇaṁ, dhammanāyagāṇaṁ, dhammasārahīṇaṁ, dhammavaracāurantacakkavaṭṭīṇaṁ,",
+                            "Appaḍihayavaranāṇadansaṇadharāṇaṁ, viyaṭṭachaumāṇaṁ,",
+                            "Jiṇāṇaṁ jāvayāṇaṁ, tinnāṇaṁ tārayāṇaṁ, buddhāṇaṁ bohayāṇaṁ, muttāṇaṁ moagāṇaṁ,",
+                            "Savvannuṇaṁ savvadarisīṇaṁ, sivamayalamaruamaṇantamakkhayamavvābāhamapuṇarāvitti siddhi­gaināmadheyaṁ ṭhāṇaṁ sampattāṇaṁ,",
+                            "Namo jiṇāṇaṁ, jiyabhayāṇaṁ."
+                        ]
+                    },
+                    songContent: {
+                        title: "Namutthunam Poetic Praise",
+                        lyricsTitle: "Lyrics",
+                        lyrics: `<p>નમું તમને હે અરિહંત ભગવંત,<br>જેમણે કર્યો છે કર્મોનો અંત,<br>અરિ-શત્રુને હણનારા,<br>ભવ-પાર અમને ઉતારનારા.<br><strong>નમું તમને હે અરિહંત ભગવંત... (૧)</strong></p><p>ધર્મ-પથના આદિ કરનારા,<br>તીરથ સ્થાપી જગને તારનારા,<br>સ્વયં જ્ઞાનને પામ્યા પોતે,<br>ગુરુ વિનાના જ્ઞાન-જ્યોતે.<br><strong>નમું તમને હે અરિહંત ભગવંત... (૨)</strong></p><p>પુરુષોમાં ઉત્તમ આપ ગણાઓ,<br>સિંહ સમા નિર્ભય કહેવાઓ,<br>પવિત્ર પુંડરિક કમળ સમા,<br>ગંધહસ્તી જેમ પાપ શમા.<br><strong>નમું તમને હે અરિહંત ભગવંત... (૩)</strong></p><p>ત્રણે લોકમાં ઉત્તમ સ્વામી,<br>જગના સાચા નાથ, અંતર્યામી,<br>દીપક બની પથ દેખાડો,<br>જ્ઞાન-પ્રકાશે જગ અજવાળો.<br><strong>નમું તમને હે અરિહંત ભગવંત... (૪)</strong></p><p>અભય-દાન દેનારા ત્રાતા,<br>જ્ઞાન-ચક્ષુના આપ જ દાતા,<br>શરણું સાચું સૌને આપો,<br>મોક્ષ-મારગને હૈયે સ્થાપો.<br><strong>નમું તમને હે અરિહંત ભગવંત... (૫)</strong></p><p>ધર્મના સારથિ, ધર્મના નાયક,<br>સર્વ જીવોને છો સુખદાયક,<br>ધર્મ-ચક્રવર્તી કહેવાયા,<br>ચાર ગતિના દુઃખ મિટાવ્યા.<br><strong>નમું તમને હે અરિહંત ભગવંત... (૬)</strong></p><p>પોતે જીત્યા, જગને જીતાડો,<br>પોતે તર્યા, ભવથી તરાડો,<br>મુક્ત થયા, મુક્તિ અપાવો,<br>બુદ્ધ થયા, બોધિ જગાવો.<br><strong>નમું તમને હે અરિહંત ભગવંત... (૭)</strong></p><p>સર્વજ્ઞાની, સર્વને દેખનારા,<br>અજ્ઞાન-પડદા વિદારનારા,<br>પામ્યા સિદ્ધિ અચળ, અનંતા,<br>જ્યાં સુખ શાશ્વત, દુઃખનો અંત આ.<br><strong>નમું તમને હે અરિહંત ભગવંત... (૮)</strong></p><p>જીત્યા ભયને, હે જિનરાયા,<br>વંદન સ્વીકારો, ઓ સુખછાયા,<br>ભાવ ભરીને શીશ નમાવી,<br>ગુણ ગાઉં છું હર્ષિત ભાવી.<br><strong>નમું તમને હે અરિહંત ભગવંત... (૯)</strong></p>`
+                    },
+                    wordByWordContent: { title: "Word by Word Meaning" },
+                    originalTextHTML: `
+                        <h2 class="text-3xl font-bold text-center text-teal-800 mb-6">Simple Meaning of Namutthunam Sutra (Step-by-Step)</h2>
+                        <div class="explanation-block"><h4>Introduction:</h4><p>This sutra is a salutation to the Arihant Bhagwans. Arihant means one who has destroyed their inner enemies (like anger, pride, deceit, greed). We bow to them by remembering their virtues.</p></div>
+                        <h3>1. Namutthunam Arihantāṇaṁ Bhagavantāṇaṁ</h3><p><strong>Meaning:</strong> My salutations to the Arihant Bhagwans.</p><div class="explanation-block"><h4>Explanation:</h4><ul class="list-disc list-inside space-y-2"><li><strong>Namutthunam:</strong> Salutations be to / I praise.</li><li><strong>Arihantāṇaṁ:</strong> 'Ari' means enemy and 'hant' means destroyer. To those Arihants who have destroyed inner enemies.</li><li><strong>Bhagavantāṇaṁ:</strong> To those endowed with infinite majesty.</li></ul></div>
+                        <h3>2. Āigarāṇaṁ Titthayarāṇaṁ Sayaṁsambuddhāṇaṁ</h3><p><strong>Meaning:</strong> To the originators (of Dharma), the establishers of the Tirth, and the self-enlightened ones.</p><div class="explanation-block"><h4>Explanation:</h4><ul class="list-disc list-inside space-y-2"><li><strong>Āigarāṇaṁ:</strong> Those who initiate the path to liberation.</li><li><strong>Titthayarāṇaṁ:</strong> Those who establish the Tirth (four-fold order).</li><li><strong>Sayaṁsambuddhāṇaṁ:</strong> Those who attain omniscience on their own.</li></ul></div>
+                        <h3>3. Purisuttamāṇaṁ, Purisasīhāṇaṁ, Purisavarapuṇḍarīāṇaṁ, Purisavaragandhahatthīṇaṁ</h3><p><strong>Meaning:</strong> To the most supreme among souls, like a lion among men, like a superior white lotus, and like a superior scent-elephant.</p><div class="explanation-block"><h4>Explanation:</h4><p>Four metaphors are used:</p><ul class="list-disc list-inside space-y-2"><li><strong>Purisuttamāṇaṁ:</strong> Supreme among all souls.</li><li><strong>Purisasīhāṇaṁ:</strong> Fearless and powerful like a lion.</li><li><strong>Purisavarapuṇḍarīāṇaṁ:</strong> Pure and detached like a white lotus in mud.</li><li><strong>Purisavaragandhahatthīṇaṁ:</strong> Whose presence dispels sins, like the scent of a mythical elephant.</li></ul></div>
+                        <h3>4. Loguttamāṇaṁ, Loganāhāṇaṁ, Logahiāṇaṁ, Logapaīvāṇaṁ, Logapajjoagarāṇaṁ</h3><p><strong>Meaning:</strong> To the supreme in the universe, the lords of the universe, the benefactors of the universe, the lamps of the universe, and the illuminators of the universe.</p><div class="explanation-block"><h4>Explanation:</h4><ul class="list-disc list-inside space-y-2"><li><strong>Loguttamāṇaṁ:</strong> Supreme in all three realms.</li><li><strong>Loganāhāṇaṁ:</strong> True protectors and guides.</li><li><strong>Logahiāṇaṁ:</strong> Who desire the welfare of all beings.</li><li><strong>Logapaīvāṇaṁ:</strong> A guiding lamp in the darkness of ignorance.</li><li><strong>Logapajjoagarāṇaṁ:</strong> Who illuminate the world with their omniscience.</li></ul></div>
+                        <h3>5. Abhayadayāṇaṁ, Cakkhudayāṇaṁ, Maggadayāṇaṁ, Saraṇadayāṇaṁ, Bohidayāṇaṁ</h3><p><strong>Meaning:</strong> To the givers of fearlessness, the givers of the eye of wisdom, the givers of the path, the givers of refuge, and the givers of Bodhi (enlightenment).</p><div class="explanation-block"><h4>Explanation:</h4><ul class="list-disc list-inside space-y-2"><li><strong>Abhayadayāṇaṁ:</strong> Givers of fearlessness from birth, death, etc.</li><li><strong>Cakkhudayāṇaṁ:</strong> Givers of the eyes of wisdom to discern right from wrong.</li><li><strong>Maggadayāṇaṁ:</strong> Showers of the true path to liberation.</li><li><strong>Saraṇadayāṇaṁ:</strong> Givers of true refuge to wandering souls.</li><li><strong>Bohidayāṇaṁ:</strong> Givers of the seed of 'Bodhi' (right faith, knowledge, conduct).</li></ul></div>
+                        <h3>6. Dhammadayāṇaṁ, Dhammadesayāṇaṁ, Dhammanāyagāṇaṁ, Dhammasārahīṇaṁ, Dhammavaracāurantacakkavaṭṭīṇaṁ</h3><p><strong>Meaning:</strong> To the givers of Dharma, the preachers of Dharma, the leaders of Dharma, the charioteers of Dharma, and the supreme spiritual emperors.</p><div class="explanation-block"><h4>Explanation:</h4><p>They are the ultimate authority and guides for Dharma, leading beings out of the cycle of four states of existence.</p></div>
+                        <h3>7. Appaḍihayavaranāṇadansaṇadharāṇaṁ, Viyaṭṭachaumāṇaṁ</h3><p><strong>Meaning:</strong> To the bearers of unobstructed supreme knowledge and vision, and the destroyers of the veil of ignorance.</p><div class="explanation-block"><h4>Explanation:</h4><p>Their knowledge is absolute and unobstructed, and they have completely overcome the state of ignorance.</p></div>
+                        <h3>8. Jiṇāṇaṁ Jāvayāṇaṁ, Tinnāṇaṁ Tārayāṇaṁ, Buddhāṇaṁ Bohayāṇaṁ, Muttāṇaṁ Moagāṇaṁ</h3><p><strong>Meaning:</strong> The conquerors who help others conquer; who have crossed the ocean of existence and help others cross; who are enlightened and enlighten others; who are liberated and liberate others.</p><div class="explanation-block"><h4>Explanation:</h4><p>This describes their dual role: achieving a state for themselves and helping others achieve the same.</p></div>
+                        <h3>9. Savvannuṇaṁ Savvadarisīṇaṁ, Sivamayalamaruamaṇantamakkhayamavvābāhamapuṇarāvitti Siddhigaināmadheyaṁ ṭhāṇaṁ sampattāṇaṁ</h3><p><strong>Meaning:</strong> To the omniscient and omni-percipient, who have attained the state of Siddhi which is auspicious, immovable, free from ailment, infinite, indestructible, without suffering, and non-returning.</p><div class="explanation-block"><h4>Explanation:</h4><p>This describes the ultimate state of liberation (Moksha) they have attained.</p></div>
+                        <h3>10. Namo Jiṇāṇaṁ, Jiyabhayāṇaṁ</h3><p><strong>Meaning:</strong> My salutations to the Jinas, who have conquered all fears.</p><div class="explanation-block"><h4>Explanation:</h4><p>A final salutation to the Jinas who have triumphed over all kinds of fear, including that of birth and death.</p></div>
+                        <div class="summary-block"><h4>Essence:</h4><p>The 'Namutthunam' sutra is not just a collection of words, but a saga of the infinite virtues of the Arihant. Reciting it with understanding enhances our devotion, purifies our thoughts, and inspires us to follow the path shown by them.</p></div>
+                    `,
+                    fullMeaningContent: {
+                        title: "Complete Meaning and Essence of the Sutra",
+                        paragraphs: [
+                            "This sutra is a salutation to the Arihant Bhagwans. Arihant means one who has destroyed their inner enemies (like anger, pride, deceit, greed). We bow to them by remembering their virtues.", "They are the originators of the righteous path, the founders of the Tirth (four-fold Jain संघ), and are self-enlightened without any external guru.", "Four metaphors are used to describe them: the most supreme among all souls, fearless like a lion, pure and detached like a white lotus, and influential like a Gandhahasti (a mythical elephant whose scent drives away all other animals), whose mere presence dispels sins.", "They are the supreme in all three realms (heaven, earth, hell), the protector of all, the benefactor of all, a guiding lamp in darkness, and the spreader of the light of knowledge.", "They grant us fearlessness, provide the eyes of wisdom, show the path to liberation (Moksha), give true shelter, and bestow upon us the seed of 'Bodhi' (right faith, knowledge, and conduct).", "They are the bestowers of Dharma, the preachers of Dharma, the leaders of Dharma, and the charioteers of Dharma. They are the supreme Dharma-Chakravarti (spiritual emperors) who end the cycle of the four states of existence and grant liberation.", "Their supreme knowledge and vision are unobstructed; they can know and see the entire universe simultaneously. They have completely destroyed the veil of ignorance.", "They themselves have conquered their karmas and help others to do so; they have crossed the ocean of worldly existence and help others to cross it; they have attained enlightenment and enlighten others; they are liberated and help others achieve liberation.", "They are omniscient (all-knowing) and omni-percipient (all-seeing) and have attained the state of Siddhi (liberation) which is auspicious, immovable, free from ailment, infinite, indestructible, without any suffering, and from where there is no return to the cycle of birth and death.", "My salutations to the Jinas, who have conquered all fears."
+                        ],
+                        summaryTitle: "Essence",
+                        summary: "The 'Namutthunam' sutra is not just a collection of words, but a saga of the infinite virtues of the Arihant. Reciting it with understanding enhances our devotion, purifies our thoughts, and inspires us to follow the path shown by them."
+                    },
+                    activitiesContent: {
+                        title: "Test Your Understanding",
+                        level1: { title: "Level 1: Beginner", description: "Learn the basic words and their meanings.", flashcards: "Flashcards", quiz: "Simple Quiz" },
+                        level2: { title: "Level 2: Intermediate", description: "Deepen your understanding of verses.", match: "Match the Columns", fillBlanks: "Fill in the Blanks", sentenceMeaning: "Sentence Meaning" },
+                        level3: { title: "Level 3: Advanced", description: "Challenge your holistic knowledge.", scramble: "Sentence Scramble", essenceSorter: "Sutra Essence Sorter" }
+                    },
+                    progressContent: {
+                        title: "Your Progress Report",
+                        overall: "Overall Progress",
+                        highScore: "High Score",
+                        reset: "Reset Progress"
+                    },
+                    wordMeanings: [
+                        { word: "Namutthunam", meaning: "Salutations be to" }, { word: "Arihantāṇaṁ", meaning: "The destroyers of enemies (karmas)" }, { word: "Bhagavantāṇaṁ", meaning: "The ones endowed with divine virtues" }, { word: "Āigarāṇaṁ", meaning: "The originators of the path" }, { word: "Titthayarāṇaṁ", meaning: "The founders of the Tirth (four-fold order)" }, { word: "Sayaṁsambuddhāṇaṁ", meaning: "The self-enlightened ones" }, { word: "Purisuttamāṇaṁ", meaning: "The most supreme among souls" }, { word: "Purisasīhāṇaṁ", meaning: "Like a lion among men (fearless)" }, { word: "Purisavarapuṇḍarīāṇaṁ", meaning: "Like a superior white lotus (pure)" }, { word: "Purisavaragandhahatthīṇaṁ", meaning: "Like a superior scent-elephant (influential)" }, { word: "Loguttamāṇaṁ", meaning: "The supreme in the universe" }, { word: "Loganāhāṇaṁ", meaning: "The lords/protectors of the universe" }, { word: "Logahiāṇaṁ", meaning: "The benefactors of the universe" }, { word: "Logapaīvāṇaṁ", meaning: "The lamps of the universe" }, { word: "Logapajjoagarāṇaṁ", meaning: "The illuminators of the universe" }, { word: "Abhayadayāṇaṁ", meaning: "The givers of fearlessness" }, { word: "Cakkhudayāṇaṁ", meaning: "The givers of the eye of wisdom" }, { word: "Maggadayāṇaṁ", meaning: "The givers of the path" }, { word: "Saraṇadayāṇaṁ", meaning: "The givers of refuge" }, { word: "Bohidayāṇaṁ", meaning: "The givers of Bodhi (enlightenment)" }, { word: "Dhammadayāṇaṁ", meaning: "The givers of Dharma (righteousness)" }, { word: "Dhammadesayāṇaṁ", meaning: "The preachers of Dharma" }, { word: "Dhammanāyagāṇaṁ", meaning: "The leaders of Dharma" }, { word: "Dhammasārahīṇaṁ", meaning: "The charioteers of Dharma" }, { word: "Dhammavaracāurantacakkavaṭṭīṇaṁ", meaning: "The supreme spiritual emperors of the four realms" }, { word: "Appaḍihayavaranāṇadansaṇadharāṇaṁ", meaning: "The bearers of unobstructed supreme knowledge and vision" }, { word: "Viyaṭṭachaumāṇaṁ", meaning: "The destroyers of the veil of ignorance" }, { word: "Jiṇāṇaṁ", meaning: "The conquerors (of karmas)" }, { word: "Jāvayāṇaṁ", meaning: "The helpers of others to conquer" }, { word: "Tinnāṇaṁ", meaning: "The ones who have crossed the ocean of life" }, { word: "Tārayāṇaṁ", meaning: "The helpers of others to cross" }, { word: "Buddhāṇaṁ", meaning: "The enlightened ones" }, { word: "Bohayāṇaṁ", meaning: "The givers of enlightenment to others" }, { word: "Muttāṇaṁ", meaning: "The liberated ones" }, { word: "Moagāṇaṁ", meaning: "The helpers of others to get liberated" }, { word: "Savvannuṇaṁ", meaning: "The omniscient (all-knowing)" }, { word: "Savvadarisīṇaṁ", meaning: "The omni-percipient (all-seeing)" }, { word: "Jiyabhayāṇaṁ", meaning: "The conquerors of all fears" }
+                    ],
+                    activities: {
+                        prev: "Prev", next: "Next", quizCompleted: "Quiz Complete!", activityCompleted: "Activity Complete!", yourScore: "Your Score", playAgain: "Play Again",
+                        flashcards: { title: "Flashcards" },
+                        simpleQuiz: { title: "Simple Quiz", question: "What is the meaning of this word?", correct: "Correct!", incorrect: "Incorrect." },
+                        matchColumn: { title: "Match the Columns", words: "Words", meanings: "Meanings", correct: "Correct!", incorrect: "Incorrect! Try again." },
+                        fillBlanks: { title: "Fill in the Blanks", correct: "Correct!", incorrect: "Incorrect." },
+                        sentenceMeaning: { title: "Sentence Meaning Quiz", question: "Choose the correct meaning for the following sentence:", correct: "Excellent! Correct answer.", incorrect: "Try again." },
+                        sentenceScramble: { title: "Sentence Scramble", instruction: "Arrange the words in the correct order to form the sentence.", check: "Check", correct: "Excellent! Correct answer.", incorrect: "Try again." },
+                        essenceSorter: { title: "Sutra Essence Sorter", instruction: "Select a concept, then place it in the correct category.", concepts: "Concepts to Sort", categories: "Categories", correct: "Correct!", incorrect: "Incorrect! Try again." }
+                    }
+                }
+            }
+        };
+
+        // --- ALPINE.JS LOGIC ---
+        function sutraApp() {
+            return {
+                language: 'gu',
+                content: {},
+                activeTab: 'sutra',
+                currentActivity: null,
+                progress: {
+                    simpleQuiz: { highScore: 0, total: 0, completed: false },
+                    matchColumn: { highScore: 0, total: 0, completed: false },
+                    fillBlanks: { highScore: 0, total: 0, completed: false },
+                    sentenceMeaning: { highScore: 0, total: 0, completed: false },
+                    sentenceScramble: { highScore: 0, total: 0, completed: false },
+                    essenceSorter: { highScore: 0, total: 0, completed: false },
+                },
+
+                flashcard: { index: 0, current: {}, isFlipped: false },
+                quiz: { questions: [], currentQuestion: { options: [] }, questionIndex: 0, score: 0, completed: false, answered: false, answerState: {}, feedback: { isCorrect: false, text: '' } },
+                match: { words: [], meanings: [], selectedWord: null, selectedMeaning: null, score: 0, total: 5, completed: false, feedback: '' },
+                fillBlanks: { questions: [], currentQuestion: { options: [] }, questionIndex: 0, score: 0, completed: false, answered: false, answerState: {}, feedback: { isCorrect: false, text: '' } },
+                sentenceMeaning: { questions: [], currentQuestion: { options: [] }, questionIndex: 0, score: 0, completed: false, answered: false, answerState: {}, feedback: { isCorrect: false, text: '' } },
+                scramble: { questions: [], currentQuestion: {}, questionIndex: 0, wordBank: [], userSentence: [], score: 0, completed: false, answered: false, feedback: { isCorrect: false, text: '' } },
+                essenceSorter: { conceptsToPlace: [], categories: [], placedConcepts: {}, selectedConcept: null, score: 0, total: 0, completed: false, feedback: ''},
+
+                init() {
+                    const savedLang = localStorage.getItem('sutraApp_language');
+                    if (savedLang) this.language = savedLang;
+                    this.loadContent();
+                    this.loadProgress();
+                },
+                loadContent() { this.content = allData.translations[this.language]; },
+                loadProgress() {
+                    const savedProgress = localStorage.getItem('sutraApp_progress');
+                    if (savedProgress) {
+                        const defaultProgress = this.progress;
+                        const loadedProgress = JSON.parse(savedProgress);
+                        this.progress = {...defaultProgress, ...loadedProgress};
+                    }
+                },
+                saveProgress() { localStorage.setItem('sutraApp_progress', JSON.stringify(this.progress)); },
+                resetProgress() {
+                    if (confirm(this.language === 'en' ? 'Are you sure you want to reset all your progress?' : (this.language === 'hi' ? 'क्या आप वाकई अपनी सारी प्रगति रीसेट करना चाहते हैं?' : 'શું તમે ખરેખર તમારી બધી પ્રગતિ રીસેટ કરવા માંગો છો?'))) {
+                        this.progress = {
+                            simpleQuiz: { highScore: 0, total: 0, completed: false },
+                            matchColumn: { highScore: 0, total: 0, completed: false },
+                            fillBlanks: { highScore: 0, total: 0, completed: false },
+                            sentenceMeaning: { highScore: 0, total: 0, completed: false },
+                            sentenceScramble: { highScore: 0, total: 0, completed: false },
+                            essenceSorter: { highScore: 0, total: 0, completed: false },
+                        };
+                        this.saveProgress();
+                    }
+                },
+                changeLanguage(lang) {
+                    this.language = lang;
+                    localStorage.setItem('sutraApp_language', lang);
+                    this.loadContent();
+                },
+                calculateOverallProgress() {
+                    const activities = Object.values(this.progress);
+                    const completedCount = activities.filter(a => a.completed).length;
+                    return activities.length > 0 ? Math.round((completedCount / activities.length) * 100) : 0;
+                },
+
+                // --- Activity Logic ---
+                startActivity(activity) {
+                    this.currentActivity = activity;
+                    if (activity === 'flashcards') this.initFlashcards();
+                    if (activity === 'simpleQuiz') this.initSimpleQuiz();
+                    if (activity === 'matchColumn') this.initMatchColumn();
+                    if (activity === 'fillBlanks') this.initFillBlanks();
+                    if (activity === 'sentenceMeaning') this.initSentenceMeaning();
+                    if (activity === 'sentenceScramble') this.initSentenceScramble();
+                    if (activity === 'essenceSorter') this.initEssenceSorter();
+                },
+                shuffleArray(array) { return [...array].sort(() => Math.random() - 0.5); },
+
+                // Flashcards
+                initFlashcards() {
+                    this.flashcard.index = 0;
+                    this.flashcard.isFlipped = false;
+                    this.flashcard.current = this.content.wordMeanings[0];
+                },
+                nextFlashcard() {
+                    this.flashcard.index = (this.flashcard.index + 1) % this.content.wordMeanings.length;
+                    this.flashcard.current = this.content.wordMeanings[this.flashcard.index];
+                    this.flashcard.isFlipped = false;
+                },
+                prevFlashcard() {
+                    this.flashcard.index = (this.flashcard.index - 1 + this.content.wordMeanings.length) % this.content.wordMeanings.length;
+                    this.flashcard.current = this.content.wordMeanings[this.flashcard.index];
+                    this.flashcard.isFlipped = false;
+                },
+
+                // Generic Quiz Functions
+                nextQuestion(type) {
+                    let state;
+                    if (type === 'simple') state = this.quiz;
+                    else if (type === 'fill') state = this.fillBlanks;
+                    else if (type === 'sentence') state = this.sentenceMeaning;
+                    else if (type === 'scramble') state = this.scramble;
+                    else return;
+
+                    if (state.questionIndex < state.questions.length - 1) {
+                        state.questionIndex++;
+                        state.answered = false;
+                        state.answerState = {};
+                        state.feedback = { isCorrect: false, text: '' };
+                        if (type === 'scramble') {
+                           this.setupScrambleQuestion();
+                        } else {
+                           state.currentQuestion = state.questions[state.questionIndex];
+                        }
+                    } else {
+                        state.completed = true;
+                        this.updateProgress(type, state.score, state.questions.length);
+                    }
+                },
+                
+                updateProgress(activityType, score, total) {
+                    const keyMap = {
+                        simple: 'simpleQuiz', match: 'matchColumn', fill: 'fillBlanks',
+                        sentence: 'sentenceMeaning', scramble: 'sentenceScramble', sorter: 'essenceSorter'
+                    };
+                    const key = keyMap[activityType];
+                    
+                    if (key && this.progress[key]) {
+                        if (score > this.progress[key].highScore) {
+                            this.progress[key].highScore = score;
+                        }
+                        this.progress[key].total = total;
+                        this.progress[key].completed = true;
+                        this.saveProgress();
+                    }
+                },
+                
+                checkAnswer(type, selectedOption) {
+                    let state, correctAnswer, correctText, incorrectText;
+                    if (type === 'simple') {
+                        state = this.quiz;
+                        correctAnswer = state.currentQuestion.correctAnswer;
+                        correctText = `<strong>${this.content.activities.simpleQuiz.correct}</strong> '${state.currentQuestion.word}' ${this.language === 'en' ? 'means' : (this.language === 'hi' ? 'का अर्थ है' : 'નો અર્થ છે')} '${correctAnswer}'.`;
+                        incorrectText = `<strong>${this.content.activities.simpleQuiz.incorrect}</strong> ${this.language === 'en' ? 'The correct meaning is' : (this.language === 'hi' ? 'सही अर्थ है' : 'સાચો અર્થ છે')} '<strong>${correctAnswer}</strong>'.`;
+                    } else if (type === 'fill') {
+                        state = this.fillBlanks;
+                        correctAnswer = state.currentQuestion.answer;
+                        correctText = `<strong>${this.content.activities.fillBlanks.correct}</strong>`;
+                        incorrectText = `<strong>${this.content.activities.fillBlanks.incorrect}</strong> ${this.language === 'en' ? 'The correct word was' : (this.language === 'hi' ? 'सही शब्द था' : 'સાચો શબ્દ હતો')} '<strong>${correctAnswer}</strong>'.`;
+                    } else if (type === 'sentence') {
+                        state = this.sentenceMeaning;
+                        correctAnswer = state.currentQuestion.correctAnswer;
+                        correctText = `<strong>${this.content.activities.sentenceMeaning.correct}</strong>`;
+                        incorrectText = `<strong>${this.content.activities.sentenceMeaning.incorrect}</strong> ${this.language === 'en' ? 'The correct explanation is' : (this.language === 'hi' ? 'सही व्याख्या है' : 'સાચી સમજૂતી છે')}:<br>"${correctAnswer}"`;
+                    } else return;
+                    
+                    if (state.answered) return;
+                    state.answered = true;
+                    
+                    if (selectedOption === correctAnswer) {
+                        state.score++;
+                        state.answerState[selectedOption] = 'correct';
+                        state.feedback = { isCorrect: true, text: correctText };
+                    } else {
+                        state.answerState[selectedOption] = 'incorrect';
+                        state.answerState[correctAnswer] = 'correct';
+                        state.feedback = { isCorrect: false, text: incorrectText };
+                    }
+                },
+
+                // Simple Quiz
+                initSimpleQuiz() {
+                    const wordMeanings = this.content.wordMeanings;
+                    this.quiz.questions = this.shuffleArray(wordMeanings).slice(0, 5).map(item => ({
+                        word: item.word,
+                        correctAnswer: item.meaning,
+                        options: this.shuffleArray([item.meaning, ...this.shuffleArray(wordMeanings.filter(w => w.meaning !== item.meaning)).slice(0, 3).map(w => w.meaning)])
+                    }));
+                    this.quiz.questionIndex = 0;
+                    this.quiz.score = 0;
+                    this.quiz.completed = false;
+                    this.quiz.answered = false;
+                    this.quiz.answerState = {};
+                    this.quiz.feedback = { isCorrect: false, text: '' };
+                    this.quiz.currentQuestion = this.quiz.questions[0];
+                },
+                
+                // Match the Column
+                initMatchColumn() {
+                    const items = this.shuffleArray([...this.content.wordMeanings]).slice(0, this.match.total);
+                    this.match.words = this.shuffleArray(items.map(i => ({ word: i.word, id: i.word, matched: false })));
+                    this.match.meanings = this.shuffleArray(items.map(i => ({ meaning: i.meaning, id: i.word, matched: false })));
+                    this.match.selectedWord = null; this.match.selectedMeaning = null;
+                    this.match.score = 0; this.match.completed = false; this.match.feedback = '';
+                },
+                selectMatchItem(type, item) {
+                    if (item.matched) return;
+                    if (type === 'word') this.match.selectedWord = item;
+                    else this.match.selectedMeaning = item;
+
+                    if (this.match.selectedWord && this.match.selectedMeaning) {
+                        if (this.match.selectedWord.id === this.match.selectedMeaning.id) {
+                            this.match.score++;
+                            this.match.feedback = this.content.activities.matchColumn.correct;
+                            this.match.words.find(w => w.id === this.match.selectedWord.id).matched = true;
+                            this.match.meanings.find(m => m.id === this.match.selectedMeaning.id).matched = true;
+                        } else {
+                            this.match.feedback = this.content.activities.matchColumn.incorrect;
+                        }
+                        setTimeout(() => {
+                            this.match.selectedWord = null; this.match.selectedMeaning = null; this.match.feedback = '';
+                            if (this.match.score === this.match.total) {
+                                this.match.completed = true;
+                                this.updateProgress('match', this.match.score, this.match.total);
+                            }
+                        }, 1200);
+                    }
+                },
+
+                // Fill in the Blanks
+                initFillBlanks() {
+                    const potential = this.content.wordMeanings.filter(w => w.word.split(' ').length === 1);
+                    this.fillBlanks.questions = this.shuffleArray(potential).slice(0, 5).map(item => {
+                        const sentence = this.content.sutraContent.lines.find(line => line.includes(item.word)) || `${item.word} is a word.`;
+                        return {
+                            sentence: sentence.replace(item.word, '<strong>_______</strong>'),
+                            answer: item.word,
+                            options: this.shuffleArray([item.word, ...this.shuffleArray(potential.filter(p => p.word !== item.word)).slice(0, 3).map(p => p.word)])
+                        };
+                    });
+                    this.fillBlanks.questionIndex = 0; this.fillBlanks.score = 0; this.fillBlanks.completed = false;
+                    this.fillBlanks.answered = false; this.fillBlanks.answerState = {};
+                    this.fillBlanks.feedback = { isCorrect: false, text: '' };
+                    this.fillBlanks.currentQuestion = this.fillBlanks.questions[0];
+                },
+                
+                // Sentence Meaning
+                initSentenceMeaning() {
+                    const meanings = this.content.fullMeaningContent.paragraphs;
+                    const questions = this.content.sutraContent.lines.map((sutraLine, index) => ({
+                        sentence: sutraLine,
+                        correctAnswer: meanings[index],
+                        options: this.shuffleArray([meanings[index], ...this.shuffleArray(meanings.filter((m, i) => i !== index)).slice(0, 3)])
+                    }));
+                    this.sentenceMeaning.questions = this.shuffleArray(questions).slice(0, 5);
+                    this.sentenceMeaning.questionIndex = 0; this.sentenceMeaning.score = 0; this.sentenceMeaning.completed = false;
+                    this.sentenceMeaning.answered = false; this.sentenceMeaning.answerState = {};
+                    this.sentenceMeaning.feedback = { isCorrect: false, text: '' };
+                    this.sentenceMeaning.currentQuestion = this.sentenceMeaning.questions[0];
+                },
+
+                // Sentence Scramble
+                initSentenceScramble() {
+                    this.scramble.questions = this.shuffleArray([...this.content.sutraContent.lines]).slice(0, 5).map(line => ({
+                        correctSentence: line.replace(/,/g, '').split(' ').filter(w => w),
+                    }));
+                    this.scramble.questionIndex = 0; this.scramble.score = 0; this.scramble.completed = false;
+                    this.setupScrambleQuestion();
+                },
+                setupScrambleQuestion() {
+                    this.scramble.currentQuestion = this.scramble.questions[this.scramble.questionIndex];
+                    this.scramble.wordBank = this.shuffleArray([...this.scramble.currentQuestion.correctSentence]);
+                    this.scramble.userSentence = []; this.scramble.answered = false; 
+                    this.scramble.feedback = { isCorrect: false, text: '' };
+                },
+                selectScrambleWord(word, index) { this.scramble.userSentence.push(word); this.scramble.wordBank.splice(index, 1); },
+                unselectScrambleWord(word, index) { this.scramble.wordBank.push(word); this.scramble.userSentence.splice(index, 1); },
+                checkScramble() {
+                    if (this.scramble.answered) return;
+                    const correctAnswer = this.scramble.currentQuestion.correctSentence.join(' ');
+                    const isCorrect = this.scramble.userSentence.join(' ') === correctAnswer;
+                    
+                    if (isCorrect) {
+                        this.scramble.feedback = { isCorrect: true, text: `<strong>${this.content.activities.sentenceScramble.correct}</strong>` };
+                        this.scramble.score++; 
+                        this.scramble.answered = true;
+                    } else {
+                         this.scramble.feedback = { isCorrect: false, text: `<strong>${this.content.activities.sentenceScramble.incorrect}</strong><br>${this.language === 'en' ? 'Correct order' : (this.language === 'hi' ? 'सही क्रम' : 'સાચો ક્રમ')}: "${correctAnswer}"` };
+                    }
+                },
+
+                // Essence Sorter
+                initEssenceSorter() {
+                    const sorterData = {
+                        en: {
+                            categories: [ {id: 'metaphor', name: 'Metaphors & Comparisons'}, {id: 'action', name: 'Actions for Others'}, {id: 'quality', name: 'Inherent Qualities'}, {id: 'state', name: 'Ultimate State'} ],
+                            concepts: [
+                                { text: 'Fearless like a lion', category: 'metaphor' }, { text: 'Pure like a white lotus', category: 'metaphor' }, { text: 'Guiding lamp', category: 'metaphor' },
+                                { text: 'Gives fearlessness', category: 'action' }, { text: 'Shows the path to Moksha', category: 'action' }, { text: 'Helps others get liberated', category: 'action' }, { text: 'Preaches Dharma', category: 'action' },
+                                { text: 'Self-enlightened', category: 'quality' }, { text: 'Omniscient (all-knowing)', category: 'quality' }, { text: 'Destroyer of inner enemies', category: 'quality' },
+                                { text: 'Attained Siddhi (liberation)', category: 'state' }, { text: 'No return to cycle of birth', category: 'state' }
+                            ]
+                        },
+                        gu: {
+                            categories: [ {id: 'metaphor', name: 'ઉપમા અને સરખામણી'}, {id: 'action', name: 'અન્યો માટેના કાર્યો'}, {id: 'quality', name: 'આંતરિક ગુણો'}, {id: 'state', name: 'અંતિમ અવસ્થા'} ],
+                            concepts: [
+                                { text: 'સિંહ જેવા નિર્ભય', category: 'metaphor' }, { text: 'શ્વેત કમળ જેવા શુદ્ધ', category: 'metaphor' }, { text: 'માર્ગદર્શક દીપક', category: 'metaphor' },
+                                { text: 'અભયનું દાન આપે છે', category: 'action' }, { text: 'મોક્ષનો માર્ગ બતાવે છે', category: 'action' }, { text: 'બીજાને મુક્ત કરાવે છે', category: 'action' }, { text: 'ધર્મનો ઉપદેશ આપે છે', category: 'action' },
+                                { text: 'સ્વયં-જ્ઞાની', category: 'quality' }, { text: 'સર્વજ્ઞ (બધું જાણનાર)', category: 'quality' }, { text: 'આંતરિક શત્રુઓનો નાશ કરનાર', category: 'quality' },
+                                { text: 'સિદ્ધિ (મોક્ષ) પ્રાપ્ત કરી છે', category: 'state' }, { text: 'જન્મ-મરણના ચક્રમાંથી મુક્તિ', category: 'state' }
+                            ]
+                        },
+                        hi: {
+                            categories: [ {id: 'metaphor', name: 'उपमा और तुलना'}, {id: 'action', name: 'दूसरों के लिए कार्य'}, {id: 'quality', name: 'अंतर्निहित गुण'}, {id: 'state', name: 'अंतिम अवस्था'} ],
+                            concepts: [
+                                { text: 'सिंह के समान निडर', category: 'metaphor' }, { text: 'श्वेत कमल के समान शुद्ध', category: 'metaphor' }, { text: 'मार्गदर्शक दीपक', category: 'metaphor' },
+                                { text: 'अभय का दान देते हैं', category: 'action' }, { text: 'मोक्ष का मार्ग दिखाते हैं', category: 'action' }, { text: 'दूसरों को मुक्त कराते हैं', category: 'action' }, { text: 'धर्म का उपदेश देते हैं', category: 'action' },
+                                { text: 'स्वयं-ज्ञानी', category: 'quality' }, { text: 'सर्वज्ञ (सब कुछ जानने वाले)', category: 'quality' }, { text: 'आंतरिक शत्रुओं का नाश करने वाले', category: 'quality' },
+                                { text: 'सिद्धि (मोक्ष) प्राप्त की है', category: 'state' }, { text: 'जन्म-मरण के चक्र से मुक्ति', category: 'state' }
+                            ]
+                        }
+                    };
+                    const data = sorterData[this.language];
+                    this.essenceSorter.categories = data.categories;
+                    this.essenceSorter.conceptsToPlace = this.shuffleArray(data.concepts);
+                    this.essenceSorter.total = data.concepts.length;
+                    this.essenceSorter.placedConcepts = { metaphor: [], action: [], quality: [], state: [] };
+                    this.essenceSorter.selectedConcept = null; this.essenceSorter.score = 0;
+                    this.essenceSorter.completed = false; this.essenceSorter.feedback = '';
+                },
+                selectSorterConcept(concept) { this.essenceSorter.selectedConcept = concept; },
+                placeSorterConcept(categoryId) {
+                    const sorter = this.essenceSorter;
+                    if (!sorter.selectedConcept) return;
+                    if (sorter.selectedConcept.category === categoryId) {
+                        sorter.placedConcepts[categoryId].push(sorter.selectedConcept);
+                        sorter.conceptsToPlace = sorter.conceptsToPlace.filter(c => c !== sorter.selectedConcept);
+                        sorter.score++;
+                        sorter.feedback = this.content.activities.essenceSorter.correct;
+                    } else {
+                        sorter.feedback = this.content.activities.essenceSorter.incorrect;
+                    }
+                    sorter.selectedConcept = null;
+                    setTimeout(() => { sorter.feedback = '' }, 1200);
+                    if (sorter.conceptsToPlace.length === 0) {
+                        sorter.completed = true;
+                        this.updateProgress('sorter', sorter.score, sorter.total);
+                    }
+                }
+            }
+        }
+    </script>
+
+</body>
+</html>
